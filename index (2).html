@@ -1,0 +1,3149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="theme-color" content="#ffffff"/>
+<title>Firefighter Training</title>
+<style>
+:root{
+  --bg:#fff;--bg2:#f5f4f0;--bg3:#eeede9;--text:#1a1a1a;--text2:#666;--text3:#999;
+  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);
+  --orange:#e07b39;--teal:#1D9E75;--blue:#378ADD;--red:#E24B4A;--amber:#BA7517;
+  --gbg:#e1f5ee;--gtxt:#085041;--obg:#faeeda;--otxt:#633806;--bbg:#E6F1FB;--btxt:#0C447C;--rbg:#FCEBEB;--rtxt:#791F1F;
+  --radius:10px;--radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;--text:#f2f2f7;--text2:#aeaeb2;--text3:#636366;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.18);
+  --gbg:#0d3d28;--gtxt:#9FE1CB;--obg:#3d2208;--otxt:#FAC775;--bbg:#0a2a44;--btxt:#B5D4F4;--rbg:#3d1010;--rtxt:#F09595;}
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);}
+#app{height:100%;display:flex;flex-direction:column;max-width:500px;margin:0 auto;}
+.screen{display:none;flex:1;overflow-y:auto;padding:16px 14px 80px;-webkit-overflow-scrolling:touch;}
+.screen.active{display:block;}
+.setup-screen{display:none;flex:1;overflow-y:auto;padding:20px 16px 40px;}
+.setup-screen.active{display:block;}
+
+/* Buttons */
+.btn{background:transparent;border:0.5px solid var(--border2);border-radius:var(--radius);padding:8px 14px;font-size:14px;font-weight:500;cursor:pointer;color:var(--text);font-family:inherit;-webkit-appearance:none;transition:opacity 0.15s;}
+.btn:active{opacity:0.7;}
+.btn-primary{background:var(--orange);border-color:var(--orange);color:#fff;}
+.btn-sm{padding:5px 11px;font-size:13px;}
+.btn-ghost{border-color:transparent;color:var(--text2);}
+.btn-teal{background:var(--gbg);border-color:var(--teal);color:var(--gtxt);}
+
+/* Cards */
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px 15px;margin-bottom:10px;}
+
+/* Inputs */
+input,textarea,select{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;outline:none;-webkit-appearance:none;width:100%;}
+input[type=number]{width:72px;text-align:center;}
+input[type=range]{accent-color:var(--orange);}
+textarea{resize:vertical;min-height:64px;}
+
+/* Nav */
+.nav-bar{display:flex;background:var(--bg);border-top:0.5px solid var(--border);padding:6px 4px max(6px,env(safe-area-inset-bottom));position:fixed;bottom:0;left:0;right:0;max-width:500px;margin:0 auto;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 2px;border-radius:8px;border:none;background:transparent;font-family:inherit;}
+.nav-item:active{background:var(--bg2);}
+.nav-icon{font-size:20px;line-height:1;}
+.nav-label{font-size:10px;color:var(--text2);}
+.nav-item.active .nav-label{color:var(--orange);font-weight:600;}
+
+/* Misc */
+.label{font-size:11px;color:var(--text2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px;}
+.badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;}
+.badge-gym{background:var(--gbg);color:var(--gtxt);}
+.badge-home{background:var(--obg);color:var(--otxt);}
+.section-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.07em;margin:14px 0 8px;}
+.divider{height:0.5px;background:var(--border);margin:10px 0;}
+.row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:0.5px solid var(--border);}
+.row:last-child{border-bottom:none;}
+.metric{background:var(--bg2);border-radius:var(--radius);padding:11px;text-align:center;}
+.metric-val{font-size:20px;font-weight:600;margin-top:2px;}
+.set-num{width:24px;height:24px;border-radius:6px;background:var(--bg2);border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text2);font-weight:500;flex-shrink:0;}
+.set-num.done{background:var(--gbg);border-color:var(--teal);color:var(--gtxt);}
+.set-num.pr{background:var(--obg);border-color:var(--orange);color:var(--otxt);}
+.log-btn{padding:5px 12px;font-size:13px;font-weight:500;border-radius:var(--radius);cursor:pointer;border:0.5px solid var(--orange);color:var(--orange);background:transparent;font-family:inherit;white-space:nowrap;}
+.log-btn.done{border-color:var(--teal);color:var(--gtxt);background:var(--gbg);}
+.progress-bar{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--orange);border-radius:3px;transition:width 0.4s;}
+.cycle-dots{display:flex;gap:5px;margin-bottom:14px;}
+.cycle-dot{flex:1;height:4px;border-radius:2px;background:var(--bg2);}
+.cycle-dot.active{background:var(--orange);}
+.cycle-dot.past{background:var(--teal);opacity:0.5;}
+.toggle{width:40px;height:22px;border-radius:11px;background:var(--bg2);border:0.5px solid var(--border2);cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;}
+.toggle.on{background:var(--orange);border-color:var(--orange);}
+.toggle-knob{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+.toggle.on .toggle-knob{left:20px;}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;justify-content:center;z-index:1000;padding:0;}
+.modal{background:var(--bg);border-radius:20px 20px 0 0;padding:20px 16px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px;}
+.alert{border-radius:var(--radius);padding:11px 14px;margin-bottom:10px;font-size:13px;}
+.pr-flash{background:var(--obg);border:0.5px solid var(--orange);border-radius:var(--radius);padding:10px 13px;margin-bottom:9px;font-size:13px;color:var(--otxt);display:flex;align-items:center;gap:8px;}
+.warmup{font-size:13px;color:var(--text2);background:var(--bg2);border-radius:var(--radius);padding:9px 12px;margin-bottom:10px;}
+
+/* Calorie ring */
+.ring-container{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-top:5px;}
+
+/* Meal sections */
+.meal-section{margin-bottom:12px;}
+.meal-header{display:flex;justify-content:space-between;align-items:center;padding:10px 15px;background:var(--bg2);border-radius:var(--radius) var(--radius) 0 0;cursor:pointer;}
+.meal-body{background:var(--bg);border:0.5px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);}
+.meal-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:0.5px solid var(--border);}
+.meal-item:last-child{border-bottom:none;}
+.meal-add{padding:10px 14px;text-align:center;cursor:pointer;color:var(--orange);font-size:14px;font-weight:500;}
+
+/* Food search results */
+.food-result{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border);}
+.food-result:last-child{border-bottom:none;}
+
+/* Spinner */
+.spinner{width:28px;height:28px;border:2px solid var(--border2);border-top-color:var(--orange);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Cal bar color states */
+.cal-ok{color:var(--teal);}
+.cal-warn{color:var(--amber);}
+.cal-over{color:var(--red);}
+
+.set-row{display:flex;align-items:center;gap:8px;padding:6px 0;}
+.notes-tip{font-size:12px;color:var(--orange);font-style:italic;margin-bottom:6px;}
+.prev-data{font-size:12px;color:var(--text2);background:var(--bg2);border-radius:8px;padding:5px 10px;margin-bottom:7px;}
+.wt-bar{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:0.5px solid var(--border);}
+.wt-bar:last-child{border-bottom:none;}
+.measure-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:14px;}
+.measure-row:last-child{border-bottom:none;}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:var(--radius);font-size:12px;gap:2px;}
+.checkin-wrap{margin-bottom:14px;}
+.checkin-label-row{display:flex;justify-content:space-between;margin-bottom:5px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- SETUP -->
+<div id="setup-screen" class="setup-screen active">
+  <div style="text-align:center;padding:24px 0 18px;">
+    <div style="font-size:44px;margin-bottom:8px;">🔥</div>
+    <div style="font-size:22px;font-weight:600;margin-bottom:4px;">Firefighter Training</div>
+    <div style="font-size:14px;color:var(--text2);">48/96 Cycle · Nutrition · Fitness</div>
+  </div>
+  <div class="card">
+    <div class="label">Cycle start date (Day 1 = first day of last shift)</div>
+    <input type="date" id="setup-date" style="margin:7px 0 14px;"/>
+    <div style="display:flex;gap:10px;margin-bottom:14px;">
+      <div style="flex:1;"><div class="label">Height</div><div style="display:flex;gap:6px;margin-top:6px;"><input type="number" id="setup-ft" placeholder="ft" style="width:62px;"/><input type="number" id="setup-in" placeholder="in" style="width:62px;"/></div></div>
+      <div style="flex:1;"><div class="label">Weight (lbs)</div><input type="number" id="setup-wt" placeholder="185" style="margin-top:6px;"/></div>
+    </div>
+    <div class="label">Goal weight (lbs)</div>
+    <input type="number" id="setup-goal" placeholder="e.g. 200" style="margin:7px 0 16px;"/>
+    <div class="label" style="margin-bottom:8px;">Daily calorie goal</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">Leave blank to auto-calculate from your stats and goal</div>
+    <input type="number" id="setup-cals" placeholder="e.g. 2800" style="margin-bottom:16px;"/>
+    <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px;" onclick="doSetup()">Start program</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main-screen" class="screen">
+  <div id="main-content"></div>
+</div>
+
+<nav class="nav-bar" id="nav-bar" style="display:none;">
+  <button class="nav-item active" id="nav-home" onclick="setTab('home')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+  <button class="nav-item" id="nav-nutrition" onclick="setTab('nutrition')"><span class="nav-icon">🥗</span><span class="nav-label">Diary</span></button>
+  <button class="nav-item" id="nav-workout" onclick="setTab('workout')"><span class="nav-icon">💪</span><span class="nav-label">Workout</span></button>
+  <button class="nav-item" id="nav-aiplan" onclick="setTab('aiplan')"><span class="nav-icon">🤖</span><span class="nav-label">AI Plan</span></button>
+  <button class="nav-item" id="nav-supps" onclick="setTab('supps')"><span class="nav-icon">💊</span><span class="nav-label">Supps</span></button>
+  <button class="nav-item" id="nav-body" onclick="setTab('body')"><span class="nav-icon">📊</span><span class="nav-label">Body</span></button>
+  <button class="nav-item" id="nav-progress" onclick="setTab('progress')"><span class="nav-icon">🏆</span><span class="nav-label">Records</span></button>
+</nav>
+
+<div id="modal-area"></div>
+</div>
+
+<script>
+// ─── STORAGE ──────────────────────────────────────────────────────────────────
+function lsGet(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+const MEALS=['Breakfast','Lunch','Dinner','Snacks'];
+const MEASURES=['Chest','Waist','Hips','Left arm','Right arm','Left thigh','Right thigh'];
+const USDA_KEY='DEMO_KEY'; // Free USDA key — rate limited but works fine for personal use
+
+// ─── WORKOUT DATA ─────────────────────────────────────────────────────────────
+const CYCLE=[
+  {day:1,label:"Day 1 — On Duty",title:"Push",sub:"Chest · Shoulders · Triceps",loc:"gym",dur:"45–55 min",
+   warmup:"5 min bike · band pull-aparts ×15 · wall slides ×10 · light DB press ×15",
+   ex:[
+    {name:"Incline DB Press",sets:4,reps:"8–10",rest:90,notes:"Slight incline, semi-supinated grip. Arc motion up, squeeze at top.",alts:[{name:"DB Floor Press",why:"Protects shoulder at bottom"},{name:"Machine Chest Press",why:"Guided path"}]},
+    {name:"DB Floor Press",sets:3,reps:"10–12",rest:75,notes:"Floor limits depth. Rest elbows on floor between reps.",alts:[{name:"Incline DB Press",why:"More ROM"},{name:"KB Floor Press",why:"Home-friendly"}]},
+    {name:"Cable Lateral Raise",sets:3,reps:"12–15ea",rest:60,notes:"Low pulley, slight lean. Lead with elbow.",alts:[{name:"DB Lateral Raise",why:"No cable"},{name:"Band Lateral Raise",why:"Home-friendly"}]},
+    {name:"Cable Rope Face Pull",sets:3,reps:"15–20",rest:60,notes:"High pulley. Pull to forehead, elbows high and wide.",alts:[{name:"Band Face Pull",why:"Anchor to door"},{name:"Band Pull-Apart",why:"Similar work"}]},
+    {name:"Cable Overhead Tricep Ext.",sets:3,reps:"12–15",rest:60,notes:"Neutral grip rope. Elbows pinned, full extension.",alts:[{name:"DB Overhead Ext.",why:"No cable"},{name:"Diamond Push-Up",why:"Bodyweight"}]},
+    {name:"Cable Tricep Pushdown",sets:3,reps:"12–15",rest:45,notes:"Rope attachment. Elbows fixed. Squeeze at bottom.",alts:[{name:"Band Pushdown",why:"Anchor to door"},{name:"Close-Grip Push-Up",why:"Bodyweight"}]},
+  ]},
+  {day:2,label:"Day 2 — On Duty",title:"Pull",sub:"Back · Biceps",loc:"gym",dur:"45–55 min",
+   warmup:"5 min row · dead hangs 3×20 sec · cat-cow ×10",
+   ex:[
+    {name:"Cable Lat Pulldown",sets:4,reps:"8–10",rest:90,notes:"Neutral or wide grip. Drive elbows to hips. Full stretch at top.",alts:[{name:"Band Pull-Down",why:"Home-friendly"},{name:"Straight-Arm Pulldown",why:"Isolates lats"}]},
+    {name:"Cable Seated Row",sets:4,reps:"10–12",rest:75,notes:"Neutral grip, sit tall. Drive elbows behind body.",alts:[{name:"DB Bent-Over Row",why:"No cable"},{name:"Band Seated Row",why:"Home-friendly"}]},
+    {name:"Single-Arm DB Row",sets:3,reps:"10–12ea",rest:75,notes:"Chest on incline bench. Full stretch at bottom.",alts:[{name:"Cable Single-Arm Row",why:"Constant tension"},{name:"KB Single-Arm Row",why:"Home-friendly"}]},
+    {name:"Cable Straight-Arm Pulldown",sets:3,reps:"12–15",rest:60,notes:"High pulley, slight lean. Arms straight, pull to thighs.",alts:[{name:"DB Pullover",why:"Great lat stretch"},{name:"Band Pulldown",why:"Home-friendly"}]},
+    {name:"Cable Rope Hammer Curl",sets:3,reps:"10–12",rest:60,notes:"Low pulley, neutral grip. Protects elbow.",alts:[{name:"DB Hammer Curl",why:"No cable"},{name:"KB Hammer Curl",why:"Home-friendly"}]},
+    {name:"Cable Incline Curl",sets:2,reps:"12–15",rest:45,notes:"Facing away, elbow behind body. Full bicep stretch.",alts:[{name:"Incline DB Curl",why:"Same stretch"},{name:"Concentration Curl",why:"Full ROM"}]},
+  ]},
+  {day:3,label:"Day 3 — Off Duty",title:"Lower Body",sub:"Glutes · Hamstrings · Core",loc:"home",dur:"45–55 min",
+   warmup:"Jacks ×10 · glute bridges ×20 · hip circles ×10ea · leg swings ×10ea",
+   ex:[
+    {name:"KB Romanian Deadlift",sets:4,reps:"10–12",rest:90,notes:"Push hips back, soft knee. Feel the hamstring stretch.",alts:[{name:"SL RDL (bodyweight)",why:"No equipment"},{name:"Good Morning (BW)",why:"Hands behind head"}]},
+    {name:"Bulgarian Split Squat",sets:4,reps:"8–10ea",rest:90,notes:"Rear foot on chair. Front knee over toe. Torso upright.",alts:[{name:"Reverse Lunge",why:"Less knee stress"},{name:"Step-Up",why:"Single-leg"}]},
+    {name:"Banded Glute Bridge",sets:3,reps:"15–20",rest:60,notes:"Band above knees. Drive up, squeeze 1 sec.",alts:[{name:"Single-Leg Bridge",why:"No band"},{name:"Hip Thrust (chair)",why:"More ROM"}]},
+    {name:"KB Swing",sets:3,reps:"15–20",rest:60,notes:"Hip hinge not a squat. Snap hips explosively.",alts:[{name:"Band Pull-Through",why:"Same pattern"},{name:"Broad Jump",why:"Explosive"}]},
+    {name:"Nordic Hamstring Curl",sets:3,reps:"5–8",rest:90,notes:"Feet under sofa. Lower as slowly as possible.",alts:[{name:"Lying Leg Curl (band)",why:"Band around ankle"},{name:"Glute-Ham Raise",why:"Similar load"}]},
+    {name:"Dead Bug",sets:3,reps:"10ea",rest:45,notes:"Lower back pressed to floor throughout.",alts:[{name:"Bird Dog",why:"Easier version"},{name:"Hollow Body Hold",why:"Same demand"}]},
+  ]},
+  {day:4,label:"Day 4 — Off Duty",title:"Upper Hybrid",sub:"Push · Pull Mix",loc:"home",dur:"45–50 min",
+   warmup:"Arm circles · shoulder rolls · band pull-aparts ×15",
+   ex:[
+    {name:"KB Floor Press",sets:4,reps:"10–12",rest:75,notes:"Floor stops ROM at bottom. Rest elbows between reps.",alts:[{name:"Push-Up (elevated)",why:"No equipment"},{name:"Band Chest Press",why:"Door anchor"}]},
+    {name:"Band Pull-Apart",sets:3,reps:"20–25",rest:45,notes:"Shoulder width. Pull to full extension. Every upper session.",alts:[{name:"Band Face Pull (door)",why:"More rotation"},{name:"W Raise (prone)",why:"No band"}]},
+    {name:"KB Single-Arm Row",sets:4,reps:"10–12ea",rest:75,notes:"Hand on chair. Hips square. Row to hip.",alts:[{name:"Band Row (door)",why:"No KB"},{name:"Towel Row (door)",why:"Bodyweight"}]},
+    {name:"Pike Push-Up",sets:3,reps:"10–15",rest:60,notes:"Inverted V. Lower head between hands. Feet higher = harder.",alts:[{name:"DB Shoulder Press",why:"Seated"},{name:"Band Overhead Press",why:"Stand on band"}]},
+    {name:"Band Bicep Curl",sets:3,reps:"15–20",rest:45,notes:"Step on band. 3-sec eccentric.",alts:[{name:"KB Curl",why:"If KB available"},{name:"Chin-Up Hold",why:"If bar available"}]},
+    {name:"KB Halo + Dead Bug",sets:3,reps:"8ea+8ea",rest:60,notes:"Circle KB slowly around head then into Dead Bug.",alts:[{name:"Band Halo + Bird Dog",why:"Band replaces KB"},{name:"Windmill (KB)",why:"Mobility"}]},
+  ]},
+  {day:5,label:"Day 5 — Off Duty",title:"Full Body",sub:"Strength · Carries",loc:"home",dur:"40–50 min",
+   warmup:"5 min walk · hip flexor 30sec ea · cat-cow ×10",
+   ex:[
+    {name:"KB Goblet Squat",sets:4,reps:"10–12",rest:90,notes:"KB at chest. Elbows inside knees. Upright torso.",alts:[{name:"BW Squat (tempo)",why:"3-sec down"},{name:"Wall Sit",why:"Isometric"}]},
+    {name:"KB Single-Leg RDL",sets:3,reps:"8–10ea",rest:90,notes:"Soft standing knee. Touch wall for balance.",alts:[{name:"BW Single-Leg RDL",why:"No KB"},{name:"Good Morning (BW)",why:"Hip hinge"}]},
+    {name:"Push-Up Variation",sets:4,reps:"8–15",rest:75,notes:"Deficit or archer. Pause at bottom.",alts:[{name:"Elevated Push-Up",why:"Easier"},{name:"KB Floor Press",why:"Loaded"}]},
+    {name:"KB Bent-Over Row",sets:4,reps:"10–12",rest:75,notes:"Hinge position. Drive elbows up. Brace core.",alts:[{name:"Band Row (door)",why:"No KB"},{name:"Inverted Row (table)",why:"Bodyweight"}]},
+    {name:"KB Farmer's Carry",sets:3,reps:"40m/45sec",rest:60,notes:"Shoulder down, stand tall. Heavy as possible.",alts:[{name:"Suitcase Carry",why:"Anti-lateral"},{name:"Loaded Backpack Walk",why:"Books"}]},
+    {name:"Pallof Press (band)",sets:3,reps:"10–12ea",rest:45,notes:"Anchor to door. Don't rotate. Hold 2 sec.",alts:[{name:"Dead Bug",why:"Anti-extension"},{name:"Side Plank",why:"No band"}]},
+  ]},
+  {day:6,label:"Day 6 — Off Duty",title:"Recovery",sub:"Mobility · Breathwork",loc:"home",dur:"20–30 min",warmup:null,
+   ex:[
+    {name:"Easy Walk",sets:1,reps:"20–30 min",rest:0,notes:"Best recovery tool. Blood flow, soreness reduction.",alts:[]},
+    {name:"Foam Roll: Quads/Lats/T-Spine",sets:1,reps:"60sec ea",rest:0,notes:"Pause on tender spots 5–10 sec.",alts:[]},
+    {name:"Hip Flexor + Hamstring Stretch",sets:1,reps:"45sec ea",rest:0,notes:"Long static holds. Breathe in.",alts:[]},
+    {name:"90/90 Hip Stretch",sets:1,reps:"60sec ea",rest:0,notes:"Internal and external hip rotation.",alts:[]},
+    {name:"Cat-Cow + Child's Pose",sets:1,reps:"5 reps ea",rest:0,notes:"Thoracic mobility.",alts:[]},
+    {name:"Box Breathing (4-4-4-4)",sets:1,reps:"5 min",rest:0,notes:"Inhale 4, hold 4, exhale 4, hold 4.",alts:[]},
+  ]},
+];
+
+const GYM_EQUIV={
+  3:{title:"Legs",sub:"Quads · Hamstrings · Glutes",dur:"50–60 min",
+     warmup:"5 min bike · leg swings ×10ea · glute bridges ×20",
+     ex:[
+      {name:"Hack Squat or Goblet Squat",sets:4,reps:"8–10",rest:90,notes:"Upright torso, knees over toes.",alts:[{name:"Leg Press",why:"Machine option"},{name:"KB Goblet Squat",why:"No machine"}]},
+      {name:"Romanian Deadlift (DB)",sets:4,reps:"8–10",rest:90,notes:"Hip hinge, soft knee, neutral spine.",alts:[{name:"Leg Curl Machine",why:"Isolates hamstrings"},{name:"KB RDL",why:"Lighter"}]},
+      {name:"Leg Press",sets:3,reps:"10–12",rest:75,notes:"High foot placement. Targets glutes and hams.",alts:[{name:"Bulgarian Split Squat",why:"Single-leg"},{name:"Walking Lunge",why:"Add DBs"}]},
+      {name:"Leg Curl Machine",sets:3,reps:"10–12",rest:60,notes:"Full ROM, control the eccentric.",alts:[{name:"Nordic Curl",why:"Bodyweight"},{name:"KB RDL",why:"Hip hinge"}]},
+      {name:"Leg Extension Machine",sets:3,reps:"12–15",rest:60,notes:"Terminal extension focus. No swinging.",alts:[{name:"Step-Up (DB)",why:"Functional"},{name:"Cyclist Squat",why:"Quad dominant"}]},
+      {name:"Standing Calf Raise",sets:3,reps:"15–20",rest:45,notes:"Full ROM. Pause top and bottom.",alts:[{name:"Seated Calf Raise",why:"Soleus focus"},{name:"Single-Leg Calf Raise",why:"Harder"}]},
+    ]},
+  4:{title:"Upper Hybrid",sub:"Push · Pull Mix",dur:"45–55 min",
+     warmup:"5 min row · band pull-aparts ×15 · arm circles",
+     ex:[
+      {name:"DB Shoulder Press",sets:4,reps:"8–10",rest:90,notes:"Seated, neutral or pronated grip. 3 sec eccentric.",alts:[{name:"Landmine Press",why:"Shoulder-friendly"},{name:"Cable Overhead Press",why:"Constant tension"}]},
+      {name:"Cable Face Pull",sets:3,reps:"15–20",rest:60,notes:"High pulley, rope. Pull to forehead. Non-negotiable.",alts:[{name:"Band Pull-Apart",why:"No cable"},{name:"Rear Delt DB Fly",why:"Incline bench"}]},
+      {name:"Cable Seated Row (Neutral)",sets:4,reps:"10–12",rest:75,notes:"Sit tall, drive elbows back.",alts:[{name:"DB Bent-Over Row",why:"No cable"},{name:"Single-Arm DB Row",why:"Unilateral"}]},
+      {name:"Cable Lateral Raise",sets:3,reps:"12–15ea",rest:60,notes:"Low pulley, slight lean. Constant tension.",alts:[{name:"DB Lateral Raise",why:"No cable"},{name:"Machine Lateral",why:"If available"}]},
+      {name:"Cable Rope Hammer Curl",sets:3,reps:"10–12",rest:60,notes:"Low pulley, neutral grip. Protects elbow.",alts:[{name:"DB Hammer Curl",why:"No cable"},{name:"Incline DB Curl",why:"Full stretch"}]},
+      {name:"Cable Tricep Pushdown",sets:3,reps:"12–15",rest:45,notes:"Elbows fixed. Squeeze at bottom.",alts:[{name:"Overhead Ext.",why:"Long head"},{name:"Close-Grip Push-Up",why:"Bodyweight"}]},
+    ]},
+  5:{title:"Full Body",sub:"Compound Strength",dur:"50–60 min",
+     warmup:"5 min row · hip circles ×10 · good mornings ×10",
+     ex:[
+      {name:"Trap Bar Deadlift",sets:4,reps:"5–7",rest:180,notes:"Neutral grip. Near-max effort. Treat as serious.",alts:[{name:"KB Deadlift",why:"Lighter load"},{name:"Romanian DL",why:"Ham emphasis"}]},
+      {name:"Incline DB Press",sets:3,reps:"8–10",rest:90,notes:"Semi-supinated grip. Arc motion up.",alts:[{name:"DB Floor Press",why:"Protects shoulder"},{name:"Machine Chest Press",why:"Guided"}]},
+      {name:"Cable Lat Pulldown",sets:3,reps:"10–12",rest:75,notes:"Drive elbows to hips. Full stretch at top.",alts:[{name:"Assisted Pull-Up",why:"Same movement"},{name:"Band Pulldown",why:"Lighter"}]},
+      {name:"Goblet Squat or Hack Squat",sets:3,reps:"10–12",rest:75,notes:"Upright torso. Knee and back friendly.",alts:[{name:"Leg Press",why:"Machine"},{name:"Split Squat",why:"Single-leg"}]},
+      {name:"KB Farmer's Carry",sets:3,reps:"40m/45sec",rest:60,notes:"Shoulder packed down. Heavy as possible.",alts:[{name:"Suitcase Carry",why:"Anti-lateral"},{name:"Overhead Carry",why:"Shoulder stability"}]},
+      {name:"Pallof Press or Dead Bug",sets:3,reps:"10–12ea",rest:45,notes:"Anti-rotation or anti-extension. Quality over speed.",alts:[{name:"Plank Variation",why:"No cable"},{name:"Ab Wheel",why:"Advanced"}]},
+    ]},
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let S={
+  cycleStart:null,heightFt:null,heightIn:0,weightLbs:null,goalWt:null,calGoal:null,
+  history:[],log:{},currentSession:null,elapsed:0,timerLeft:0,timerTotal:0,
+  diary:{},nutrLog:{},
+  wtHistory:[],prs:{},checkins:{},sleepLog:{},measurements:[],mealTemplates:[],
+  sessionNotes:'',cycleCount:0,deloadCycles:0,workoutActive:false,gymOverride:false,
+  activeMeal:'Breakfast',pendingMeal:null,
+  customCycle:null,   // AI-generated plan — when set, replaces built-in CYCLE
+  aiPlanMeta:null,    // {goal, experience, injuries, generatedAt}
+  suppList:[
+    {id:'creatine',name:'Creatine Monohydrate',dose:5,unit:'g',times:['Morning'],notes:'Mix with water or shake. Load phase optional.',active:true},
+    {id:'vit-d',name:'Vitamin D3',dose:5000,unit:'IU',times:['Morning'],notes:'Take with a fat-containing meal.',active:true},
+    {id:'fish-oil',name:'Fish Oil (Omega-3)',dose:2,unit:'g',times:['Morning'],notes:'With food to reduce fishy burps.',active:true},
+    {id:'magnesium',name:'Magnesium Glycinate',dose:400,unit:'mg',times:['Night'],notes:'Before bed — supports sleep and recovery.',active:true},
+    {id:'zinc',name:'Zinc',dose:30,unit:'mg',times:['Night'],notes:'Take on empty stomach or with food if it causes nausea.',active:false},
+    {id:'multivitamin',name:'Multivitamin',dose:1,unit:'tablet',times:['Morning'],notes:'With breakfast.',active:false},
+  ],
+  suppLog:{},
+};
+let elapsedInt=null,timerInt=null,activeTab='home',selectedQuality='good';
+
+function save(){lsSet('ff-app-v2',S);}
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function cycleDay(start){if(!start)return 1;const d=Math.floor((Date.now()-new Date(start).getTime())/86400000);return(d%6)+1;}
+function fmtTime(s){const m=Math.floor(s/60),sec=s%60;return m+":"+String(sec).padStart(2,"0");}
+function lbsToKg(lb){return lb*0.453592;}
+
+// Returns the active workout cycle — custom AI plan if set, otherwise built-in
+function getActiveCycle(){return S.customCycle||CYCLE;}
+
+// ─── PROGRESSION ENGINE ───────────────────────────────────────────────────────
+// Aggressive mode: add weight every session you complete all reps
+
+// Increment table by exercise type (lbs to add when all reps hit)
+function getIncrement(exName){
+  const n=exName.toLowerCase();
+  if(n.includes('deadlift')||n.includes('rdl'))return 5;
+  if(n.includes('squat')||n.includes('press')&&n.includes('bench'))return 5;
+  if(n.includes('row')||n.includes('pulldown')||n.includes('pull-down'))return 2.5;
+  if(n.includes('press'))return 2.5;
+  if(n.includes('curl')||n.includes('extension')||n.includes('pushdown')||n.includes('raise'))return 2.5;
+  if(n.includes('carry')||n.includes('swing'))return 5;
+  return 2.5; // default
+}
+
+// Get the last logged weight for an exercise across all history
+function getLastWeight(exName,cycleDay){
+  const past=[...S.history].reverse().filter(h=>h.cycleDay===cycleDay&&h.log);
+  for(const session of past){
+    const cycle=getActiveCycle().find(d=>d.day===cycleDay);
+    if(!cycle)continue;
+    const ei=cycle.ex.findIndex(e=>e.name===exName);
+    if(ei===-1)continue;
+    const exLog=session.log[ei];
+    if(!exLog)continue;
+    const sets=Object.values(exLog).filter(s=>s?.done&&s.weight);
+    if(sets.length>0){
+      // Return average weight logged across sets
+      const avg=sets.reduce((a,s)=>a+parseFloat(s.weight),0)/sets.length;
+      return{weight:Math.round(avg*10)/10,reps:sets.map(s=>parseInt(s.reps)||0),allSets:sets.length,targetSets:cycle.ex[ei]?.sets||sets.length,date:session.date};
+    }
+  }
+  return null;
+}
+
+// Did the user complete all reps last session for this exercise?
+function completedAllRepsLastSession(exName,cycleDay){
+  const past=[...S.history].reverse().find(h=>h.cycleDay===cycleDay&&h.log);
+  if(!past)return false;
+  const cycle=getActiveCycle().find(d=>d.day===cycleDay);
+  if(!cycle)return false;
+  const ei=cycle.ex.findIndex(e=>e.name===exName);
+  if(ei===-1)return false;
+  const exLog=past.log[ei];
+  if(!exLog)return false;
+  const ex=cycle.ex[ei];
+  // Parse target reps from range like "8–10" — take the top of range
+  const repStr=String(ex.reps||'');
+  const repMatch=repStr.match(/(\d+)/g);
+  const targetReps=repMatch?parseInt(repMatch[repMatch.length-1]):8;
+  const sets=Object.values(exLog).filter(s=>s?.done);
+  if(sets.length<(ex.sets||3))return false; // didn't complete all sets
+  return sets.every(s=>parseInt(s.reps||0)>=targetReps);
+}
+
+// Get the recommended weight target for an exercise
+function getTarget(exName,cycleDay){
+  const last=getLastWeight(exName,cycleDay);
+  if(!last)return{targetWeight:null,lastWeight:null,isIncrease:false,isDecrease:false,reason:'No data yet — start with a weight you can do for all sets'};
+  const hitAll=completedAllRepsLastSession(exName,cycleDay);
+  const inc=getIncrement(exName);
+  if(hitAll){
+    // Aggressive: add weight
+    return{targetWeight:last.weight+inc,lastWeight:last.weight,isIncrease:true,isDecrease:false,reason:`Hit all reps last time — add ${inc} lbs`};
+  } else {
+    // Didn't complete all reps — hold weight
+    return{targetWeight:last.weight,lastWeight:last.weight,isIncrease:false,isDecrease:false,reason:'Hold weight — focus on hitting all reps this session'};
+  }
+}
+
+// Get targets for all exercises in a session
+function getSessionTargets(session){
+  if(!session||!session.ex)return[];
+  return session.ex.map(ex=>({name:ex.name,...getTarget(ex.name,session.day)}));
+}
+
+// Should we deload? 4 or more cycles since last deload
+function shouldDeload(){
+  return(S.cycleCount-(S.deloadCycles||0))>=4;
+}
+
+// Activate deload — reduce all progression weights by 40%
+function activateDeload(){
+  S.deloadCycles=S.cycleCount;
+  save();
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:8px;">Deload week activated</div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:16px;line-height:1.6;">This week your target weights will automatically be set to 60% of your normal working weights. Focus on perfect form and full range of motion. Your body is recovering — let it.</div>
+    <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="closeModal();setTab('home')">Got it</button>`);
+}
+
+// Build the daily trainer brief
+function buildTrainerBrief(session,dayNum,readiness,sleep,checkin,alreadyDone){
+  const targets=getSessionTargets(session);
+  const lastSameSession=[...S.history].reverse().find(h=>h.cycleDay===dayNum);
+  const totalSessions=S.history.length;
+  const weekSessions=S.history.filter(h=>(Date.now()-new Date(h.date).getTime())<7*86400000).length;
+  const cyclesSinceDeload=S.cycleCount-(S.deloadCycles||0);
+  const prCount=Object.keys(S.prs).length;
+  const lw=S.wtHistory.length?S.wtHistory[S.wtHistory.length-1].wt:null;
+
+  // Readiness context
+  const readStr=readiness>=8?'You\'re fully recovered and ready to push hard today.':
+    readiness>=6?'Your readiness is solid — train at full intensity.':
+    readiness<5?'Your body is telling you it needs more recovery. Dial back intensity today.':
+    'Moderate recovery — train at a steady pace and see how you feel.';
+
+  // Sleep context
+  const sleepStr=sleep?
+    (parseFloat(sleep.hours)>=8?'Great sleep last night — your recovery is on point.':
+    parseFloat(sleep.hours)<6?'Short sleep last night — your central nervous system may be fatigued. Don\'t grind.':''):
+    'No sleep logged — tap Check in to get a more accurate readiness score.';
+
+  // Progression highlights
+  const increasers=targets.filter(t=>t.isIncrease);
+  const progStr=increasers.length>0?
+    `Time to add weight on ${increasers.length===1?increasers[0].name:increasers.length+' exercises'} — you earned it last session.`:'';
+
+  // Last session context
+  let lastStr='';
+  if(lastSameSession){
+    const setsDone=Object.values(lastSameSession.log||{}).reduce((a,ex)=>a+Object.values(ex).filter(s=>s?.done).length,0);
+    const elapsed=lastSameSession.elapsed?fmtTime(lastSameSession.elapsed):'';
+    lastStr=`Last time you did this session: ${setsDone} sets completed${elapsed?' in '+elapsed:''}.`;
+  } else {
+    lastStr=totalSessions===0?'This is your first tracked session. Focus on logging weights so the app can build your progression.':
+    `You haven\'t done this session before — treat it as a baseline and log every set.`;
+  }
+
+  // Deload check
+  if(cyclesSinceDeload>=4&&!alreadyDone){
+    return{
+      main:`You\'ve trained hard for ${cyclesSinceDeload} cycles without a deload. ${readStr}`,
+      focus:`Consider starting a deload week — your long-term progress depends on recovery as much as training. Hit the deload button above.`
+    };
+  }
+
+  // Already done today
+  if(alreadyDone){
+    return{
+      main:`Today\'s workout is done. ${weekSessions} sessions this week.${prCount>0?' You\'ve hit '+prCount+' PRs since you started.':''}`,
+      focus:`Recovery window is open — prioritize protein and sleep tonight.`
+    };
+  }
+
+  // Recovery day
+  if(dayNum===6){
+    return{
+      main:`Active recovery day. Light movement, mobility work, and breathing. ${sleepStr||readStr}`,
+      focus:`This isn\'t optional — recovery is where the gains actually happen. Skip this and tomorrow\'s session suffers.`
+    };
+  }
+
+  // Normal training day
+  const parts=[readStr,sleepStr,progStr,lastStr].filter(Boolean);
+  return{
+    main:parts.slice(0,2).join(' '),
+    focus:[progStr,lastStr].filter(Boolean).slice(0,1)[0]||null
+  };
+}
+
+
+function getDiary(date){if(!S.diary[date])S.diary[date]={Breakfast:[],Lunch:[],Dinner:[],Snacks:[]};return S.diary[date];}
+function getAllEntries(date){const d=getDiary(date);return MEALS.flatMap(m=>d[m]||[]);}
+function sumMacro(entries,key){return Math.round(entries.reduce((a,e)=>a+(parseFloat(e[key])||0),0));}
+
+function getCalGoal(){
+  if(S.calGoal)return S.calGoal;
+  const lw=S.wtHistory.length?S.wtHistory[S.wtHistory.length-1].wt:S.weightLbs;
+  const kg=lw?lbsToKg(lw):null;
+  const htCm=S.heightFt?(S.heightFt*12+(S.heightIn||0))*2.54:175;
+  const tdee=kg?Math.round((10*kg+6.25*htCm-5*30+5)*1.55):2400;
+  return tdee+375; // muscle building surplus
+}
+
+function getProteinGoal(){
+  const lw=S.wtHistory.length?S.wtHistory[S.wtHistory.length-1].wt:S.weightLbs;
+  return lw?Math.round(lbsToKg(lw)*2.0):150;
+}
+
+// ─── READINESS ────────────────────────────────────────────────────────────────
+function getReadiness(){
+  const ci=S.checkins[todayStr()],sl=S.sleepLog[todayStr()];
+  let score=7;
+  if(sl){const h=parseFloat(sl.hours)||7;if(h>=8)score+=1;else if(h<6)score-=2;else if(h<7)score-=1;if(sl.quality==='poor')score-=1;else if(sl.quality==='great')score+=1;}
+  if(ci){score=Math.round((score+(parseInt(ci.energy)||7))/2);if(ci.soreness>=8)score-=1;if(ci.stress>=8)score-=1;}
+  return Math.max(1,Math.min(10,score));
+}
+
+function getSessionLoc(session){return S.gymOverride&&session.loc==='home'?'gym':session.loc;}
+function getEffectiveSession(session){
+  if(!S.gymOverride||session.loc==='gym')return session;
+  const eq=GYM_EQUIV[session.day];
+  return eq?{...session,...eq,loc:'gym',label:session.label+' (OT — Gym)'}:session;
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function init(){
+  const saved=lsGet('ff-app-v2');
+  // Try migrating from old key
+  if(!saved){
+    const old=lsGet('ff-app');
+    if(old?.cycleStart){
+      Object.assign(S,old);
+      // Migrate old nutrLog to diary
+      if(old.nutrLog){
+        Object.entries(old.nutrLog).forEach(([date,entries])=>{
+          getDiary(date);
+          S.diary[date].Snacks=[...entries];
+        });
+      }
+      S.diary=S.diary||{};
+      save();
+      document.getElementById('setup-screen').classList.remove('active');
+      document.getElementById('main-screen').classList.add('active');
+      document.getElementById('nav-bar').style.display='flex';
+      setTab('home');return;
+    }
+  }
+  if(saved?.cycleStart){
+    Object.assign(S,saved);
+    document.getElementById('setup-screen').classList.remove('active');
+    document.getElementById('main-screen').classList.add('active');
+    document.getElementById('nav-bar').style.display='flex';
+    setTab('home');
+  } else {
+    document.getElementById('setup-date').value=todayStr();
+  }
+}
+
+function doSetup(){
+  const d=document.getElementById('setup-date').value;if(!d)return;
+  S.cycleStart=d;
+  S.heightFt=parseFloat(document.getElementById('setup-ft').value)||null;
+  S.heightIn=parseFloat(document.getElementById('setup-in').value)||0;
+  S.weightLbs=parseFloat(document.getElementById('setup-wt').value)||null;
+  S.goalWt=parseFloat(document.getElementById('setup-goal').value)||null;
+  S.calGoal=parseFloat(document.getElementById('setup-cals').value)||null;
+  S.wtHistory=S.weightLbs?[{date:todayStr(),wt:S.weightLbs}]:[];
+  S.diary={};S.history=[];S.prs={};S.checkins={};S.sleepLog={};S.measurements=[];S.mealTemplates=[];S.cycleCount=0;
+  save();
+  document.getElementById('setup-screen').classList.remove('active');
+  document.getElementById('main-screen').classList.add('active');
+  document.getElementById('nav-bar').style.display='flex';
+  setTab('home');
+}
+
+// ─── TAB ROUTER ──────────────────────────────────────────────────────────────
+function setTab(tab){
+  activeTab=tab;
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const nb=document.getElementById('nav-'+tab);if(nb)nb.classList.add('active');
+  const mc=document.getElementById('main-content');
+  if(tab==='home')mc.innerHTML=renderHome();
+  else if(tab==='nutrition')mc.innerHTML=renderDiary();
+  else if(tab==='workout')mc.innerHTML=renderWorkoutTab();
+  else if(tab==='aiplan')mc.innerHTML=renderAIPlan();
+  else if(tab==='supps')mc.innerHTML=renderSupps();
+  else if(tab==='body')mc.innerHTML=renderBody();
+  else if(tab==='progress')mc.innerHTML=renderProgress();
+  const ms=document.getElementById('main-screen');if(ms)ms.scrollTop=0;
+  if(tab==='workout'&&S.workoutActive&&!elapsedInt){
+    elapsedInt=setInterval(()=>{S.elapsed++;const el=document.getElementById('elapsed-display');if(el)el.textContent=fmtTime(S.elapsed);},1000);
+  }
+}
+
+// ─── SVG CALORIE RING ──────────────────────────────────────────────────────────
+function calRing(consumed,goal,size=110){
+  const pct=Math.min(1,consumed/goal);
+  const r=42,cx=55,cy=55;
+  const circ=2*Math.PI*r;
+  const dash=pct*circ;
+  const remaining=goal-consumed;
+  const over=remaining<0;
+  const color=over?'var(--red)':remaining<goal*0.1?'var(--amber)':'var(--teal)';
+  return`<svg width="${size}" height="${size}" viewBox="0 0 110 110">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--bg2)" stroke-width="10"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="10"
+      stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${circ*0.25}" stroke-linecap="round"
+      style="transition:stroke-dasharray 0.5s;"/>
+    <text x="${cx}" y="${cy-8}" text-anchor="middle" font-size="20" font-weight="700" fill="${color}" font-family="-apple-system,sans-serif">${Math.abs(Math.round(remaining)).toLocaleString()}</text>
+    <text x="${cx}" y="${cy+10}" text-anchor="middle" font-size="11" fill="var(--text2)" font-family="-apple-system,sans-serif">${over?'over':'remaining'}</text>
+    <text x="${cx}" y="${cy+26}" text-anchor="middle" font-size="10" fill="var(--text3)" font-family="-apple-system,sans-serif">kcal</text>
+  </svg>`;
+}
+
+function macroBar(label,val,goal,color){
+  const pct=Math.min(100,Math.round((val/goal)*100));
+  return`<div style="flex:1;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+      <span style="font-size:11px;color:var(--text2);">${label}</span>
+      <span style="font-size:11px;font-weight:600;color:${color};">${val}<span style="font-weight:400;color:var(--text2);">g</span></span>
+    </div>
+    <div style="height:4px;background:var(--bg2);border-radius:2px;overflow:hidden;">
+      <div style="height:100%;width:${pct}%;background:${color};border-radius:2px;transition:width 0.4s;"></div>
+    </div>
+    <div style="font-size:10px;color:var(--text2);margin-top:2px;">${goal}g goal</div>
+  </div>`;
+}
+
+// ─── HOME ─────────────────────────────────────────────────────────────────────
+function renderHome(){
+  const dn=cycleDay(S.cycleStart);
+  const baseSession=getActiveCycle().find(d=>d.day===dn);
+  const session=getEffectiveSession(baseSession);
+  const isGym=getSessionLoc(baseSession)==='gym';
+  const isHomeDay=baseSession.loc==='home';
+  const done=S.history.find(h=>h.date===todayStr()&&h.cycleDay===dn)?.completed;
+  const r=getReadiness();
+  const rColor=r>=8?'var(--teal)':r>=6?'var(--amber)':'var(--red)';
+  const today=todayStr();
+  const entries=getAllEntries(today);
+  const consumed=sumMacro(entries,'cal');
+  const calGoal=getCalGoal();
+  const proConsumed=sumMacro(entries,'pro');
+  const carbConsumed=sumMacro(entries,'carb');
+  const fatConsumed=sumMacro(entries,'fat');
+  const proGoal=getProteinGoal();
+  const carbGoal=Math.round(calGoal*0.40/4);
+  const fatGoal=Math.round(calGoal*0.25/9);
+  const sl=S.sleepLog[today],ci=S.checkins[today];
+  const lw=S.wtHistory.length?S.wtHistory[S.wtHistory.length-1].wt:null;
+  const isHomeToggle=isHomeDay?`
+    <div style="background:${S.gymOverride?'var(--bbg)':'var(--bg2)'};border:0.5px solid ${S.gymOverride?'var(--blue)':'var(--border)'};border-radius:var(--radius);padding:10px 13px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+      <div><div style="font-size:13px;font-weight:500;color:${S.gymOverride?'var(--btxt)':'var(--text)'};">${S.gymOverride?'OT mode — gym workout':'Picked up OT? Switch to gym workout'}</div></div>
+      <div class="toggle ${S.gymOverride?'on':''}" onclick="toggleGymOverride()" ${S.gymOverride?'style="background:var(--blue);border-color:var(--blue);"':''}><div class="toggle-knob"></div></div>
+    </div>`:'';
+  const brief=buildTrainerBrief(session,dn,r,sl,ci,done);
+  const deloadNeeded=shouldDeload();
+  const targets=deloadNeeded?null:getSessionTargets(session);
+
+  return`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div><div class="label">48/96 Training</div><div style="font-size:20px;font-weight:600;">${new Date().toLocaleDateString('en',{weekday:'long'})}</div></div>
+      <button class="btn btn-sm" onclick="showCheckinModal()">Check in</button>
+    </div>
+    <div class="cycle-dots">${getActiveCycle().map(d=>`<div class="cycle-dot ${d.day===dn?'active':d.day<dn?'past':''}"></div>`).join('')}</div>
+
+    <div class="card" style="margin-bottom:10px;border-left:3px solid ${rColor};border-radius:0 var(--radius-lg) var(--radius-lg) 0;">
+      <div style="font-size:11px;font-weight:600;color:${rColor};letter-spacing:0.07em;text-transform:uppercase;margin-bottom:7px;">Your trainer says</div>
+      <div style="font-size:14px;line-height:1.65;">${brief.main}</div>
+      ${brief.focus?`<div style="margin-top:9px;padding-top:9px;border-top:0.5px solid var(--border);font-size:13px;color:var(--text2);line-height:1.5;">💡 ${brief.focus}</div>`:''}
+    </div>
+
+    ${deloadNeeded?`<div style="background:var(--obg);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+      <div><div style="font-size:13px;font-weight:600;color:var(--otxt);">Deload week recommended</div>
+        <div style="font-size:12px;color:var(--otxt);margin-top:2px;">${S.cycleCount-(S.deloadCycles||0)} cycles without a deload — reduce all weights by 40%</div></div>
+      <button class="btn btn-sm" style="flex-shrink:0;" onclick="activateDeload()">Start deload</button>
+    </div>`:''}
+
+    ${isHomeToggle}
+
+    <div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div><div class="label">${session.label}</div><div style="font-size:20px;font-weight:600;">${session.title}</div><div style="font-size:14px;color:var(--text2);">${session.sub}</div></div>
+        <div style="text-align:right;"><span class="badge ${isGym?'badge-gym':'badge-home'}">${isGym?'Gym':'Home'}</span><div style="font-size:12px;color:var(--text2);margin-top:5px;">${session.dur}</div></div>
+      </div>
+      ${targets&&targets.some(t=>t.targetWeight)?`
+      <div style="background:var(--bg2);border-radius:var(--radius);padding:10px 12px;margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:600;color:var(--orange);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:7px;">Today's targets</div>
+        ${targets.filter(t=>t.targetWeight).map(t=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--border);">
+            <div style="font-size:13px;">${t.name}</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              ${t.lastWeight?`<span style="font-size:12px;color:var(--text2);">last ${t.lastWeight}</span>`:''}
+              <span style="font-size:13px;font-weight:700;color:var(--orange);">${t.targetWeight} lbs</span>
+              ${t.isIncrease?'<span style="font-size:11px;color:var(--teal);">↑</span>':''}
+            </div>
+          </div>`).join('')}
+      </div>`:''}
+      ${session.warmup?`<div class="warmup"><span style="font-weight:600;">Warm-up</span> ${session.warmup}</div>`:''}
+      ${done
+        ?`<div style="background:var(--gbg);border-radius:var(--radius);padding:10px;text-align:center;color:var(--gtxt);font-weight:600;">✓ Completed today</div>`
+        :`<button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px;" onclick="startWorkoutFlow(${dn})">${dn===6?'View recovery plan':'Start workout'}</button>`}
+    </div>
+
+    <div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:14px;font-weight:600;">Today's nutrition</div>
+        <button class="btn btn-sm" onclick="setTab('nutrition')">Add food →</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div>${calRing(consumed,calGoal,90)}</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:7px;">
+          ${macroBar('Protein',proConsumed,proGoal,'var(--teal)')}
+          ${macroBar('Carbs',carbConsumed,carbGoal,'var(--blue)')}
+          ${macroBar('Fat',fatConsumed,fatGoal,'var(--amber)')}
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-around;margin-top:10px;padding-top:9px;border-top:0.5px solid var(--border);">
+        <div style="text-align:center;"><div style="font-size:15px;font-weight:600;">${consumed.toLocaleString()}</div><div style="font-size:11px;color:var(--text2);">Eaten</div></div>
+        <div style="text-align:center;"><div style="font-size:15px;font-weight:600;color:var(--teal);">${calGoal.toLocaleString()}</div><div style="font-size:11px;color:var(--text2);">Goal</div></div>
+        <div style="text-align:center;"><div style="font-size:15px;font-weight:600;color:${calGoal-consumed<0?'var(--red)':'var(--orange)'};">${Math.abs(calGoal-consumed).toLocaleString()}</div><div style="font-size:11px;color:var(--text2);">${calGoal-consumed<0?'Over':'Left'}</div></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-sm" onclick="showCalendarModal()">Calendar</button>
+      <button class="btn btn-sm" onclick="showWeeklySummary()">Weekly summary</button>
+      <button class="btn btn-ghost btn-sm" onclick="showSleepModal()">Log sleep</button>
+    </div>`;
+}
+
+
+// ─── DIARY TAB ────────────────────────────────────────────────────────────────
+function renderDiary(){
+  const today=todayStr();
+  const diary=getDiary(today);
+  const allEntries=getAllEntries(today);
+  const calGoal=getCalGoal();
+  const proGoal=getProteinGoal();
+  const consumed=sumMacro(allEntries,'cal');
+  const proConsumed=sumMacro(allEntries,'pro');
+  const carbConsumed=sumMacro(allEntries,'carb');
+  const fatConsumed=sumMacro(allEntries,'fat');
+  const remaining=calGoal-consumed;
+  const remainColor=remaining<0?'var(--red)':remaining<calGoal*0.1?'var(--amber)':'var(--teal)';
+
+  const mealSections=MEALS.map(meal=>{
+    const items=diary[meal]||[];
+    const mealCals=sumMacro(items,'cal');
+    return`<div class="meal-section">
+      <div class="meal-header" onclick="toggleMealSection('${meal}')">
+        <div>
+          <div style="font-size:15px;font-weight:600;">${meal}</div>
+          <div style="font-size:12px;color:var(--text2);">${items.length?`${mealCals} kcal · ${items.length} item${items.length>1?'s':''}` :'No entries yet'}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:13px;color:var(--text2);" id="meal-arrow-${meal}">▼</span>
+        </div>
+      </div>
+      <div class="meal-body" id="meal-body-${meal}">
+        ${items.map((item,ii)=>`
+          <div class="meal-item">
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:500;">${item.name}</div>
+              <div style="font-size:12px;color:var(--text2);">${item.cal||0} kcal${item.pro?` · ${item.pro}g protein`:''}${item.carb?` · ${item.carb}g carbs`:''}${item.fat?` · ${item.fat}g fat`:''}</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="removeDiaryEntry('${today}','${meal}',${ii})" style="font-size:13px;padding:4px 8px;flex-shrink:0;">✕</button>
+          </div>`).join('')}
+        <div class="meal-add" onclick="openAddFood('${meal}')">+ Add food to ${meal}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <div style="font-size:20px;font-weight:600;">Food diary</div>
+      <div style="font-size:13px;color:var(--text2);">${new Date().toLocaleDateString('en',{month:'short',day:'numeric'})}</div>
+    </div>
+
+    <!-- Daily summary bar -->
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
+        ${calRing(consumed,calGoal,90)}
+        <div style="flex:1;">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:2px;">Calories remaining</div>
+          <div style="font-size:26px;font-weight:700;color:${remainColor};">${Math.abs(remaining).toLocaleString()}</div>
+          <div style="font-size:12px;color:var(--text2);">${remaining<0?'over goal':'of '+calGoal.toLocaleString()+' goal'}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        ${macroBar('Protein',proConsumed,proGoal,'var(--teal)')}
+        <div style="width:0.5px;background:var(--border);flex-shrink:0;"></div>
+        ${macroBar('Carbs',carbConsumed,Math.round(calGoal*0.4/4),'var(--blue)')}
+        <div style="width:0.5px;background:var(--border);flex-shrink:0;"></div>
+        ${macroBar('Fat',fatConsumed,Math.round(calGoal*0.25/9),'var(--amber)')}
+      </div>
+    </div>
+
+    <!-- Meal sections -->
+    ${mealSections}
+
+    <!-- Saved meals -->
+    ${S.mealTemplates.length?`
+      <div class="section-title">Saved meals</div>
+      <div class="card" style="padding:10px 14px;">
+        ${S.mealTemplates.map((t,ti)=>`<div class="row"><div style="font-size:14px;font-weight:500;">${t.name}<span style="font-size:12px;color:var(--text2);margin-left:8px;">${t.cal||''}${t.cal?' kcal':''}</span></div>
+          <div style="display:flex;gap:7px;">
+            <button class="btn btn-sm" onclick="addTemplateToMeal(${ti})">Add</button>
+            <button class="btn btn-ghost btn-sm" onclick="deleteTemplate(${ti})">✕</button>
+          </div></div>`).join('')}
+      </div>`:''
+    }`;
+}
+
+function toggleMealSection(meal){
+  const body=document.getElementById(`meal-body-${meal}`);
+  const arrow=document.getElementById(`meal-arrow-${meal}`);
+  if(body){const h=body.style.display==='none';body.style.display=h?'':'none';if(arrow)arrow.textContent=h?'▼':'▲';}
+}
+
+function removeDiaryEntry(date,meal,idx){
+  if(!S.diary[date]||!S.diary[date][meal])return;
+  S.diary[date][meal].splice(idx,1);
+  save();setTab('nutrition');
+}
+
+function addTemplateToMeal(ti){
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:14px;">Add "${S.mealTemplates[ti].name}" to:</div>
+    ${MEALS.map(m=>`<button class="btn" style="width:100%;margin-bottom:8px;text-align:left;padding:12px 14px;" onclick="doAddTemplate(${ti},'${m}')">${m}</button>`).join('')}`);
+}
+
+function doAddTemplate(ti,meal){
+  const today=todayStr();
+  getDiary(today);
+  S.diary[today][meal].push({...S.mealTemplates[ti]});
+  save();closeModal();setTab('nutrition');
+}
+
+function deleteTemplate(ti){S.mealTemplates.splice(ti,1);save();setTab('nutrition');}
+
+// ─── ADD FOOD MODAL ───────────────────────────────────────────────────────────
+// ─── LOCAL FOOD DATABASE (~400 common US foods) ───────────────────────────────
+// Format: [name, calories, protein_g, carbs_g, fat_g, serving_label]
+const FOOD_DB=[
+  // Proteins - Meat & Poultry
+  ["Chicken breast, grilled (4oz)",185,35,0,4,"4oz (113g)"],
+  ["Chicken thigh, cooked (4oz)",210,28,0,11,"4oz (113g)"],
+  ["Chicken breast, rotisserie (3oz)",140,26,0,3,"3oz (85g)"],
+  ["Ground beef 93% lean (4oz)",195,28,0,9,"4oz (113g)"],
+  ["Ground beef 80% lean (4oz)",287,20,0,23,"4oz (113g)"],
+  ["Steak, sirloin (4oz)",220,30,0,11,"4oz (113g)"],
+  ["Steak, ribeye (4oz)",310,24,0,24,"4oz (113g)"],
+  ["Pork tenderloin (4oz)",187,30,0,6,"4oz (113g)"],
+  ["Pork chop, lean (4oz)",215,26,0,12,"4oz (113g)"],
+  ["Turkey breast, sliced (3oz)",90,19,1,1,"3oz (85g)"],
+  ["Ground turkey 93% (4oz)",170,22,0,9,"4oz (113g)"],
+  ["Bacon, 2 strips",86,6,0,7,"2 strips (16g)"],
+  ["Ham, deli (3oz)",108,18,1,3,"3oz (85g)"],
+  ["Lamb chop (4oz)",245,26,0,15,"4oz (113g)"],
+  ["Bison, ground (4oz)",200,26,0,10,"4oz (113g)"],
+  // Proteins - Seafood
+  ["Salmon, Atlantic (4oz)",233,25,0,15,"4oz (113g)"],
+  ["Tuna, canned in water (5oz)",150,33,0,2,"5oz can (142g)"],
+  ["Tilapia (4oz)",145,30,0,3,"4oz (113g)"],
+  ["Shrimp, cooked (4oz)",120,23,1,2,"4oz (113g)"],
+  ["Cod (4oz)",119,26,0,1,"4oz (113g)"],
+  ["Mahi-mahi (4oz)",124,27,0,1,"4oz (113g)"],
+  ["Sardines, canned (3oz)",177,21,0,10,"3oz (85g)"],
+  ["Crab, Alaskan king (3oz)",82,16,0,1,"3oz (85g)"],
+  // Proteins - Eggs & Dairy
+  ["Eggs, large (2)",143,13,1,10,"2 eggs"],
+  ["Eggs, large (3)",214,18,1,14,"3 eggs"],
+  ["Egg whites (1 cup)",126,26,2,0,"1 cup (243g)"],
+  ["Greek yogurt, plain (1 cup)",130,17,9,3,"1 cup (245g)"],
+  ["Greek yogurt, 0% fat (1 cup)",100,17,6,0,"1 cup (245g)"],
+  ["Cottage cheese, 2% (1 cup)",183,25,8,5,"1 cup (226g)"],
+  ["Cottage cheese, 1% (1 cup)",163,28,6,2,"1 cup (226g)"],
+  ["Mozzarella, part-skim (1oz)",72,7,1,5,"1oz (28g)"],
+  ["Cheddar cheese (1oz)",113,7,0,9,"1oz (28g)"],
+  ["Parmesan, grated (2 tbsp)",42,4,0,3,"2 tbsp (10g)"],
+  ["Milk, whole (1 cup)",149,8,12,8,"1 cup (244ml)"],
+  ["Milk, 2% (1 cup)",122,8,12,5,"1 cup (244ml)"],
+  ["Milk, skim (1 cup)",83,8,12,0,"1 cup (244ml)"],
+  ["Chocolate milk (1 cup)",208,8,32,8,"1 cup (244ml)"],
+  ["String cheese (1 stick)",80,7,1,5,"1 stick (28g)"],
+  ["American cheese (1 slice)",65,4,2,5,"1 slice (19g)"],
+  // Proteins - Plant & Supplements
+  ["Protein powder, whey (1 scoop)",120,25,3,2,"1 scoop (32g)"],
+  ["Protein powder, casein (1 scoop)",120,24,4,1,"1 scoop (35g)"],
+  ["Protein bar, Quest (1 bar)",200,21,23,9,"1 bar (60g)"],
+  ["Protein bar, Kind (1 bar)",250,12,25,16,"1 bar (50g)"],
+  ["Tofu, firm (4oz)",94,10,2,5,"4oz (113g)"],
+  ["Edamame (1 cup)",189,17,16,8,"1 cup (155g)"],
+  ["Lentils, cooked (1 cup)",230,18,40,1,"1 cup (198g)"],
+  ["Black beans, cooked (1 cup)",227,15,41,1,"1 cup (172g)"],
+  ["Chickpeas, cooked (1 cup)",269,15,45,4,"1 cup (164g)"],
+  ["Kidney beans, cooked (1 cup)",225,15,40,1,"1 cup (177g)"],
+  // Carbs - Grains & Starches
+  ["White rice, cooked (1 cup)",206,4,45,0,"1 cup (186g)"],
+  ["Brown rice, cooked (1 cup)",218,5,46,2,"1 cup (195g)"],
+  ["Jasmine rice, cooked (1 cup)",200,4,44,0,"1 cup (186g)"],
+  ["Oatmeal, cooked (1 cup)",166,6,28,4,"1 cup (234g)"],
+  ["Oats, dry (1/2 cup)",150,5,27,3,"1/2 cup (40g)"],
+  ["Pasta, cooked (1 cup)",220,8,43,1,"1 cup (140g)"],
+  ["Whole wheat pasta, cooked (1 cup)",174,7,37,1,"1 cup (140g)"],
+  ["Bread, white (1 slice)",79,3,15,1,"1 slice (28g)"],
+  ["Bread, whole wheat (1 slice)",81,4,15,1,"1 slice (28g)"],
+  ["Bagel, plain (1 medium)",270,10,53,2,"1 medium (98g)"],
+  ["English muffin (1)",134,4,26,1,"1 muffin (57g)"],
+  ["Tortilla, flour 10\" (1)",218,6,36,6,"1 tortilla (72g)"],
+  ["Tortilla, corn 6\" (1)",58,2,12,1,"1 tortilla (26g)"],
+  ["Pita bread 6\" (1)",165,5,33,1,"1 pita (60g)"],
+  ["Quinoa, cooked (1 cup)",222,8,39,4,"1 cup (185g)"],
+  ["Couscous, cooked (1 cup)",176,6,36,0,"1 cup (157g)"],
+  ["Crackers, wheat (5)",90,2,14,3,"5 crackers (16g)"],
+  ["Pancakes, plain (2 medium)",175,4,27,7,"2 pancakes (86g)"],
+  ["Waffles (1 medium)",218,6,25,11,"1 waffle (75g)"],
+  ["Granola (1/2 cup)",299,8,40,15,"1/2 cup (61g)"],
+  ["Cornmeal (1/4 cup dry)",110,2,24,1,"1/4 cup (35g)"],
+  // Carbs - Potatoes & Root Veg
+  ["Sweet potato, baked (medium)",103,2,24,0,"1 medium (130g)"],
+  ["Potato, baked (medium)",161,4,37,0,"1 medium (173g)"],
+  ["Potato, mashed (1 cup)",237,4,36,9,"1 cup (210g)"],
+  ["French fries (medium, fast food)",365,4,48,17,"medium order (117g)"],
+  ["Hash browns (1 cup)",165,2,17,10,"1 cup (156g)"],
+  // Carbs - Fruits
+  ["Banana (1 medium)",105,1,27,0,"1 medium (118g)"],
+  ["Apple (1 medium)",95,0,25,0,"1 medium (182g)"],
+  ["Orange (1 medium)",62,1,15,0,"1 medium (131g)"],
+  ["Grapes (1 cup)",104,1,27,0,"1 cup (92g)"],
+  ["Blueberries (1 cup)",84,1,21,0,"1 cup (148g)"],
+  ["Strawberries (1 cup)",49,1,12,0,"1 cup (152g)"],
+  ["Mango, sliced (1 cup)",107,1,28,1,"1 cup (165g)"],
+  ["Pineapple, chunks (1 cup)",82,1,22,0,"1 cup (165g)"],
+  ["Watermelon (2 cups)",85,2,21,0,"2 cups (280g)"],
+  ["Avocado (half)",120,2,6,11,"half (100g)"],
+  ["Avocado (whole)",240,3,13,22,"1 whole (200g)"],
+  ["Raisins (1/4 cup)",125,1,33,0,"1/4 cup (41g)"],
+  ["Dates (2 medjool)",133,1,36,0,"2 dates (48g)"],
+  // Fats & Nuts
+  ["Peanut butter, natural (2 tbsp)",190,8,6,16,"2 tbsp (32g)"],
+  ["Almond butter (2 tbsp)",196,7,6,18,"2 tbsp (32g)"],
+  ["Almonds (1oz / 23 nuts)",164,6,6,14,"1oz (28g)"],
+  ["Walnuts (1oz / 14 halves)",185,4,4,18,"1oz (28g)"],
+  ["Cashews (1oz / 18 nuts)",157,5,9,12,"1oz (28g)"],
+  ["Mixed nuts (1oz)",173,5,6,16,"1oz (28g)"],
+  ["Peanuts (1oz)",161,7,5,14,"1oz (28g)"],
+  ["Olive oil (1 tbsp)",119,0,0,14,"1 tbsp (14ml)"],
+  ["Coconut oil (1 tbsp)",121,0,0,14,"1 tbsp (14ml)"],
+  ["Butter (1 tbsp)",102,0,0,12,"1 tbsp (14g)"],
+  ["Cream cheese (2 tbsp)",97,2,1,10,"2 tbsp (29g)"],
+  ["Sour cream (2 tbsp)",60,1,1,6,"2 tbsp (29g)"],
+  ["Mayonnaise (1 tbsp)",94,0,0,10,"1 tbsp (14g)"],
+  ["Hummus (2 tbsp)",54,2,5,3,"2 tbsp (30g)"],
+  ["Guacamole (2 tbsp)",45,1,3,4,"2 tbsp (30g)"],
+  // Vegetables
+  ["Broccoli, cooked (1 cup)",55,4,11,1,"1 cup (156g)"],
+  ["Spinach, raw (2 cups)",14,2,2,0,"2 cups (60g)"],
+  ["Kale, raw (2 cups)",67,4,12,1,"2 cups (94g)"],
+  ["Romaine lettuce (2 cups)",16,1,3,0,"2 cups (94g)"],
+  ["Mixed greens (2 cups)",20,2,3,0,"2 cups (80g)"],
+  ["Carrots, raw (1 cup)",52,1,12,0,"1 cup (128g)"],
+  ["Cucumber (1 cup sliced)",16,1,4,0,"1 cup (119g)"],
+  ["Tomato (1 medium)",22,1,5,0,"1 medium (123g)"],
+  ["Cherry tomatoes (1 cup)",27,1,6,0,"1 cup (149g)"],
+  ["Bell pepper (1 medium)",37,1,7,0,"1 medium (119g)"],
+  ["Asparagus (1 cup cooked)",40,4,8,0,"1 cup (180g)"],
+  ["Green beans (1 cup cooked)",44,2,10,0,"1 cup (125g)"],
+  ["Brussels sprouts (1 cup cooked)",56,4,11,1,"1 cup (156g)"],
+  ["Cauliflower (1 cup cooked)",29,2,5,0,"1 cup (124g)"],
+  ["Zucchini (1 cup cooked)",27,2,5,1,"1 cup (180g)"],
+  ["Corn (1 cup cooked)",132,5,29,2,"1 cup (154g)"],
+  ["Peas (1 cup cooked)",134,9,25,0,"1 cup (160g)"],
+  ["Mushrooms (1 cup cooked)",44,3,8,1,"1 cup (156g)"],
+  ["Onion (1 medium)",44,1,10,0,"1 medium (110g)"],
+  // Fast Food & Restaurant
+  ["McDonald's Big Mac",550,25,45,30,"1 burger"],
+  ["McDonald's McChicken",400,14,40,21,"1 sandwich"],
+  ["McDonald's Egg McMuffin",300,18,30,12,"1 sandwich"],
+  ["McDonald's Filet-O-Fish",390,16,39,19,"1 sandwich"],
+  ["McDonald's Medium Fries",320,4,44,15,"1 medium order"],
+  ["Chick-fil-A Chicken Sandwich",440,28,40,19,"1 sandwich"],
+  ["Chick-fil-A Grilled Sandwich",320,29,37,6,"1 sandwich"],
+  ["Chick-fil-A Nuggets 8pc",260,26,11,12,"8 pieces"],
+  ["Chick-fil-A Waffle Fries (medium)",420,5,54,20,"1 medium"],
+  ["Subway 6\" Turkey Breast",280,18,40,4,"6\" sub"],
+  ["Subway 6\" Chicken Teriyaki",350,26,48,5,"6\" sub"],
+  ["Subway 12\" Turkey Breast",560,36,80,8,"12\" sub"],
+  ["Chipotle Burrito Bowl (chicken)",760,51,80,23,"1 bowl"],
+  ["Chipotle Burrito Bowl (steak)",670,45,69,20,"1 bowl"],
+  ["Chipotle Chicken Taco (3)",525,32,52,18,"3 tacos"],
+  ["Panera Bread You Pick Two",550,30,60,18,"half + half"],
+  ["Starbucks Egg White Bites (2)",170,13,13,7,"2 bites"],
+  ["Domino's Pepperoni Pizza (2 slices)",560,22,62,24,"2 slices, large"],
+  ["Domino's Cheese Pizza (2 slices)",480,18,62,18,"2 slices, large"],
+  ["Buffalo Wild Wings (12 traditional)",790,60,3,60,"12 wings, naked"],
+  ["Taco Bell Crunchy Taco",170,8,13,10,"1 taco"],
+  ["Burger King Whopper",660,28,49,40,"1 burger"],
+  ["KFC Original Chicken (2 pieces)",420,38,14,23,"2 pieces"],
+  // Breakfast Foods
+  ["Cheerios (1 cup with milk)",210,8,36,4,"1 cup cereal + 1/2c milk"],
+  ["Special K (1 cup with milk)",190,9,37,2,"1 cup cereal + 1/2c milk"],
+  ["Frosted Flakes (1 cup)",148,2,36,0,"1 cup (41g)"],
+  ["Overnight oats (1 serving)",350,15,48,10,"1 jar"],
+  ["Scrambled eggs 3 + toast",350,22,26,14,"home breakfast"],
+  ["Bacon egg cheese biscuit",480,19,37,27,"1 biscuit"],
+  ["Breakfast burrito (home)",450,28,38,18,"1 burrito"],
+  ["Bagel with cream cheese",370,13,54,12,"1 bagel + 2tbsp cream cheese"],
+  ["Greek yogurt parfait",280,16,42,5,"1 parfait"],
+  // Snacks
+  ["Protein bar, Clif (1)",250,10,44,6,"1 bar (68g)"],
+  ["Kind bar, Almond (1)",200,6,22,15,"1 bar (40g)"],
+  ["RX Bar (1)",210,12,24,9,"1 bar (52g)"],
+  ["Rice cakes (2 plain)",70,1,15,0,"2 cakes (18g)"],
+  ["Popcorn, air-popped (3 cups)",93,3,19,1,"3 cups (24g)"],
+  ["Chips, Lay's (1oz)",160,2,15,10,"1oz (28g)"],
+  ["Pretzels (1oz)",108,3,23,1,"1oz (28g)"],
+  ["Tortilla chips (1oz)",140,2,19,7,"1oz (28g)"],
+  ["Dark chocolate (1oz)",170,2,13,12,"1oz (28g)"],
+  ["Granola bar, Quaker (1)",190,4,35,5,"1 bar (47g)"],
+  ["Apple with peanut butter",285,9,31,16,"1 apple + 2tbsp PB"],
+  ["Cottage cheese + fruit (1 cup)",220,22,18,5,"1 cup cottage + 1/2c fruit"],
+  ["Celery + peanut butter (4 sticks)",170,5,8,13,"4 sticks + 2tbsp PB"],
+  // Drinks & Shakes
+  ["Orange juice (8oz)",110,2,26,0,"8oz (240ml)"],
+  ["Apple juice (8oz)",117,0,29,0,"8oz (240ml)"],
+  ["Gatorade (20oz)",130,0,35,0,"20oz bottle"],
+  ["Gatorade (32oz)",210,0,56,0,"32oz bottle"],
+  ["Muscle Milk Pro (1 shake)",160,25,8,4,"1 ready-to-drink"],
+  ["Premier Protein shake",160,30,5,3,"1 bottle (340ml)"],
+  ["Fairlife Core Power shake",230,42,14,3,"1 bottle (355ml)"],
+  ["Whole milk (8oz)",149,8,12,8,"8oz (240ml)"],
+  ["2% milk (8oz)",122,8,12,5,"8oz (240ml)"],
+  ["Almond milk, unsweetened (8oz)",30,1,1,3,"8oz (240ml)"],
+  ["Oat milk (8oz)",120,3,16,5,"8oz (240ml)"],
+  ["Coffee, black (8oz)",5,0,0,0,"8oz"],
+  ["Latte, whole milk (12oz)",180,11,15,9,"12oz (Starbucks tall)"],
+  ["Protein coffee (1 serving)",120,20,5,2,"1 serving"],
+  // Condiments & Sauces
+  ["Ketchup (1 tbsp)",20,0,5,0,"1 tbsp (17g)"],
+  ["BBQ sauce (2 tbsp)",70,0,17,0,"2 tbsp (36g)"],
+  ["Ranch dressing (2 tbsp)",145,1,2,15,"2 tbsp (30ml)"],
+  ["Italian dressing (2 tbsp)",70,0,3,7,"2 tbsp (30ml)"],
+  ["Balsamic vinaigrette (2 tbsp)",80,0,6,6,"2 tbsp (30ml)"],
+  ["Salsa (2 tbsp)",10,0,2,0,"2 tbsp (30g)"],
+  ["Hot sauce (1 tsp)",0,0,0,0,"1 tsp (5ml)"],
+  ["Soy sauce (1 tbsp)",10,1,1,0,"1 tbsp (18ml)"],
+  ["Sriracha (1 tsp)",5,0,1,0,"1 tsp (7g)"],
+  // Station-friendly / Firefighter foods
+  ["Chili, beef (1 cup)",287,22,28,12,"1 cup (253g)"],
+  ["Soup, chicken noodle (1 cup)",75,6,9,2,"1 cup (240ml)"],
+  ["Soup, tomato (1 cup)",90,2,20,0,"1 cup (244ml)"],
+  ["Sandwich, ham + cheese",430,24,38,19,"1 sandwich"],
+  ["Sandwich, turkey + cheese",400,26,38,13,"1 sandwich"],
+  ["Burrito, bean + cheese",445,18,55,16,"1 large burrito"],
+  ["Pizza, cheese (2 slices home)",490,22,56,18,"2 slices"],
+  ["Pasta + meat sauce (1 cup)",350,20,40,12,"1 cup"],
+  ["Chicken stir fry (1 cup)",280,28,20,10,"1 cup"],
+  ["Beef tacos (2)",380,22,28,18,"2 tacos"],
+  ["Grilled cheese sandwich",440,16,36,26,"1 sandwich"],
+  ["PB&J sandwich",380,14,52,13,"1 sandwich"],
+
+  // ── McDONALD'S ──────────────────────────────────────────────────────────────
+  ["McDonald's Big Mac",550,25,45,30,"1 burger"],
+  ["McDonald's Double Big Mac",740,40,46,42,"1 burger"],
+  ["McDonald's McDouble",400,22,36,20,"1 burger"],
+  ["McDonald's Quarter Pounder with Cheese",520,30,43,26,"1 burger"],
+  ["McDonald's Double Quarter Pounder with Cheese",740,48,43,42,"1 burger"],
+  ["McDonald's McChicken",400,14,40,21,"1 sandwich"],
+  ["McDonald's Crispy Chicken Sandwich",470,22,46,21,"1 sandwich"],
+  ["McDonald's Spicy Crispy Chicken Sandwich",530,24,57,23,"1 sandwich"],
+  ["McDonald's Filet-O-Fish",390,16,39,19,"1 sandwich"],
+  ["McDonald's Egg McMuffin",310,17,30,13,"1 sandwich"],
+  ["McDonald's Sausage McMuffin with Egg",480,21,30,31,"1 sandwich"],
+  ["McDonald's Sausage Biscuit with Egg",520,18,38,33,"1 sandwich"],
+  ["McDonald's Hotcakes (3)",580,13,102,15,"3 pancakes"],
+  ["McDonald's Hash Browns",150,2,15,9,"1 order"],
+  ["McDonald's Small Fries",230,3,30,11,"1 small"],
+  ["McDonald's Medium Fries",320,4,44,15,"1 medium"],
+  ["McDonald's Large Fries",480,7,66,23,"1 large"],
+  ["McDonald's 10pc Nuggets",420,24,26,24,"10 pieces"],
+  ["McDonald's 20pc Nuggets",830,48,52,48,"20 pieces"],
+  ["McDonald's McFlurry Oreo (medium)",690,14,106,20,"1 medium"],
+  ["McDonald's Vanilla Soft Serve",200,5,33,5,"1 cone"],
+  ["McDonald's Large Coke",290,0,79,0,"32oz"],
+  ["McDonald's Premium Roast Coffee",0,0,0,0,"12oz black"],
+  ["McDonald's Iced Coffee (medium)",260,5,46,6,"medium with cream+sugar"],
+
+  // ── WHATABURGER ────────────────────────────────────────────────────────────
+  ["Whataburger Original",590,24,61,26,"1 burger"],
+  ["Whataburger Double",820,46,62,44,"1 burger"],
+  ["Whataburger Triple",1070,68,63,62,"1 burger"],
+  ["Whataburger Bacon Burger",710,34,62,36,"1 burger"],
+  ["Whataburger Avocado Bacon Burger",760,36,63,40,"1 burger"],
+  ["Whataburger Mushroom Swiss Burger",650,32,63,29,"1 burger"],
+  ["Whataburger Honey BBQ Chicken Strip Sandwich",700,35,72,29,"1 sandwich"],
+  ["Whataburger Crispy Chicken Sandwich",530,24,53,24,"1 sandwich"],
+  ["Whataburger Grilled Chicken Sandwich",430,34,44,12,"1 sandwich"],
+  ["Whataburger Spicy Chicken Sandwich",560,25,57,26,"1 sandwich"],
+  ["Whataburger Breakfast on a Bun (egg & cheese)",360,16,35,17,"1 sandwich"],
+  ["Whataburger Breakfast Platter",720,24,74,36,"1 platter"],
+  ["Whataburger Taquito with Cheese",330,16,34,15,"1 taquito"],
+  ["Whataburger Pancakes (3)",580,11,100,16,"3 pancakes"],
+  ["Whataburger Medium Fries",380,5,52,18,"1 medium"],
+  ["Whataburger Large Fries",490,7,67,23,"1 large"],
+  ["Whataburger Onion Rings (medium)",420,5,56,20,"1 medium"],
+  ["Whataburger Apple Pie",230,2,33,11,"1 pie"],
+  ["Whataburger Chocolate Chunk Cookie",210,2,31,9,"1 cookie"],
+
+  // ── CHICK-FIL-A ─────────────────────────────────────────────────────────────
+  ["Chick-fil-A Original Chicken Sandwich",440,28,40,19,"1 sandwich"],
+  ["Chick-fil-A Spicy Deluxe Sandwich",560,37,46,22,"1 sandwich"],
+  ["Chick-fil-A Grilled Chicken Sandwich",320,29,37,6,"1 sandwich"],
+  ["Chick-fil-A Grilled Chicken Club",500,42,39,17,"1 sandwich"],
+  ["Chick-fil-A Chicken Biscuit",460,19,52,19,"1 sandwich"],
+  ["Chick-fil-A Egg White Grill",290,26,31,7,"1 sandwich"],
+  ["Chick-fil-A Chicken Nuggets 8pc",260,26,11,12,"8 pieces"],
+  ["Chick-fil-A Chicken Nuggets 12pc",380,38,17,18,"12 pieces"],
+  ["Chick-fil-A Grilled Nuggets 8pc",140,25,3,3,"8 pieces"],
+  ["Chick-fil-A Grilled Nuggets 12pc",200,38,4,4,"12 pieces"],
+  ["Chick-fil-A Chicken Strips 3pc",400,35,30,13,"3 strips"],
+  ["Chick-fil-A Medium Waffle Fries",420,5,54,20,"1 medium"],
+  ["Chick-fil-A Large Waffle Fries",520,7,66,25,"1 large"],
+  ["Chick-fil-A Mac & Cheese (medium)",450,18,37,26,"1 medium side"],
+  ["Chick-fil-A Kale Crunch Side",120,4,11,8,"1 side"],
+  ["Chick-fil-A Fruit Cup (small)",60,1,15,0,"1 small"],
+  ["Chick-fil-A Lemonade (medium)",200,0,52,0,"medium"],
+  ["Chick-fil-A Milkshake Vanilla (medium)",590,14,88,18,"1 medium"],
+  ["Chick-fil-A Chocolate Fudge Brownie",350,3,46,16,"1 brownie"],
+
+  // ── BURGER KING ─────────────────────────────────────────────────────────────
+  ["Burger King Whopper",660,28,49,40,"1 burger"],
+  ["Burger King Double Whopper",900,48,50,56,"1 burger"],
+  ["Burger King Whopper Jr.",310,15,27,18,"1 burger"],
+  ["Burger King Bacon Cheeseburger",310,17,28,14,"1 burger"],
+  ["Burger King Big Fish",480,19,56,21,"1 sandwich"],
+  ["Burger King Crispy Chicken Sandwich",660,25,72,31,"1 sandwich"],
+  ["Burger King Spicy Crispy Chicken Sandwich",700,27,72,33,"1 sandwich"],
+  ["Burger King Impossible Whopper",630,25,58,34,"1 burger"],
+  ["Burger King Croissan'wich Egg & Cheese",340,14,29,19,"1 sandwich"],
+  ["Burger King Sausage Biscuit",390,11,36,23,"1 sandwich"],
+  ["Burger King Medium Fries",380,4,52,18,"1 medium"],
+  ["Burger King Onion Rings (medium)",330,4,42,16,"1 medium"],
+  ["Burger King 8pc Nuggets",230,13,15,13,"8 pieces"],
+
+  // ── WENDY'S ─────────────────────────────────────────────────────────────────
+  ["Wendy's Dave's Single",570,30,40,29,"1 burger"],
+  ["Wendy's Dave's Double",830,52,40,47,"1 burger"],
+  ["Wendy's Dave's Triple",1090,74,40,65,"1 burger"],
+  ["Wendy's Baconator",950,57,37,61,"1 burger"],
+  ["Wendy's Son of Baconator",660,38,38,38,"1 burger"],
+  ["Wendy's Spicy Chicken Sandwich",500,29,57,17,"1 sandwich"],
+  ["Wendy's Grilled Chicken Sandwich",400,34,42,10,"1 sandwich"],
+  ["Wendy's Classic Chicken Sandwich",590,30,57,26,"1 sandwich"],
+  ["Wendy's 4pc Chicken Nuggets",180,9,11,11,"4 pieces"],
+  ["Wendy's 10pc Chicken Nuggets",420,22,26,26,"10 pieces"],
+  ["Wendy's Spicy Chicken Nuggets 4pc",200,9,14,12,"4 pieces"],
+  ["Wendy's Medium Fries",420,5,56,20,"1 medium"],
+  ["Wendy's Medium Chili",240,18,22,8,"1 medium"],
+  ["Wendy's Baked Potato (plain)",270,7,61,0,"1 potato"],
+  ["Wendy's Side Salad",25,2,5,0,"1 salad, no dressing"],
+  ["Wendy's Frosty Vanilla (medium)",420,11,72,10,"1 medium"],
+  ["Wendy's Frosty Chocolate (medium)",430,11,72,10,"1 medium"],
+
+  // ── TACO BELL ───────────────────────────────────────────────────────────────
+  ["Taco Bell Crunchy Taco",170,8,13,10,"1 taco"],
+  ["Taco Bell Soft Taco",180,9,18,8,"1 taco"],
+  ["Taco Bell Supreme Soft Taco",210,10,21,9,"1 taco"],
+  ["Taco Bell Doritos Locos Taco (Nacho Cheese)",170,8,13,10,"1 taco"],
+  ["Taco Bell Chalupa Supreme",350,14,38,16,"1 chalupa"],
+  ["Taco Bell Crunchwrap Supreme",520,17,67,20,"1 wrap"],
+  ["Taco Bell Bean Burrito",380,14,56,10,"1 burrito"],
+  ["Taco Bell Beef Burrito (5-layer)",490,19,66,16,"1 burrito"],
+  ["Taco Bell Chicken Burrito",360,19,48,10,"1 burrito"],
+  ["Taco Bell Steak Quesadilla",520,26,42,26,"1 quesadilla"],
+  ["Taco Bell Nachos BellGrande",740,20,79,38,"1 order"],
+  ["Taco Bell Mexican Pizza",700,23,72,36,"1 pizza"],
+  ["Taco Bell Cheesy Gordita Crunch",490,20,49,23,"1 item"],
+  ["Taco Bell Power Menu Bowl (chicken)",470,26,51,18,"1 bowl"],
+  ["Taco Bell Chips & Nacho Cheese",220,3,30,10,"1 side"],
+  ["Taco Bell Cinnabon Delights (2)",170,2,22,8,"2 pieces"],
+  ["Taco Bell Breakfast Crunchwrap",660,26,62,34,"1 wrap"],
+  ["Taco Bell Breakfast Soft Taco (egg & cheese)",180,8,20,7,"1 taco"],
+
+  // ── SONIC ────────────────────────────────────────────────────────────────────
+  ["Sonic Cheeseburger",580,28,46,30,"1 burger"],
+  ["Sonic SuperSONIC Double Cheeseburger",900,52,46,56,"1 burger"],
+  ["Sonic Bacon Double Cheeseburger",900,54,46,56,"1 burger"],
+  ["Sonic Jr. Deluxe Burger",420,22,37,20,"1 burger"],
+  ["Sonic Crispy Chicken Sandwich",580,23,63,26,"1 sandwich"],
+  ["Sonic Grilled Chicken Sandwich",390,29,39,11,"1 sandwich"],
+  ["Sonic Classic Chicken Sandwich",550,23,55,24,"1 sandwich"],
+  ["Sonic Corn Dog",210,7,25,9,"1 corn dog"],
+  ["Sonic Medium Tater Tots",360,4,48,17,"1 medium"],
+  ["Sonic Medium Fries",350,4,47,17,"1 medium"],
+  ["Sonic Large Cherry Limeade",230,0,61,0,"1 large"],
+  ["Sonic Vanilla Shake (medium)",540,12,84,18,"1 medium"],
+  ["Sonic Hot Dog Plain",280,11,26,14,"1 hot dog"],
+  ["Sonic Breakfast Burrito (Bacon)",470,22,40,22,"1 burrito"],
+
+  // ── JACK IN THE BOX ─────────────────────────────────────────────────────────
+  ["Jack in the Box Jumbo Jack",580,25,55,30,"1 burger"],
+  ["Jack in the Box Ultimate Cheeseburger",900,46,53,57,"1 burger"],
+  ["Jack in the Box Sourdough Jack",700,33,35,49,"1 burger"],
+  ["Jack in the Box Spicy Crispy Chicken",590,24,61,27,"1 sandwich"],
+  ["Jack in the Box Cluck Sandwich",630,25,65,30,"1 sandwich"],
+  ["Jack in the Box Tacos 2pc",170,7,17,8,"2 tacos"],
+  ["Jack in the Box Egg Rolls 3pc",230,7,26,11,"3 rolls"],
+  ["Jack in the Box Curly Fries (medium)",410,5,49,21,"1 medium"],
+  ["Jack in the Box Onion Rings",500,6,51,30,"1 order"],
+  ["Jack in the Box Breakfast Jack",360,18,31,17,"1 sandwich"],
+  ["Jack in the Box Grilled Breakfast Sandwich",520,26,41,27,"1 sandwich"],
+  ["Jack in the Box Loaded Breakfast Sandwich",760,36,59,41,"1 sandwich"],
+
+  // ── POPEYES ─────────────────────────────────────────────────────────────────
+  ["Popeyes Chicken Sandwich",699,28,50,42,"1 sandwich"],
+  ["Popeyes Spicy Chicken Sandwich",699,28,50,42,"1 sandwich"],
+  ["Popeyes Classic Chicken (breast)",380,30,11,23,"1 piece"],
+  ["Popeyes Spicy Chicken (breast)",400,30,11,25,"1 piece"],
+  ["Popeyes Chicken Tenders 3pc",300,27,14,14,"3 tenders"],
+  ["Popeyes Chicken Tenders 5pc",500,45,23,24,"5 tenders"],
+  ["Popeyes Red Beans & Rice",230,8,31,9,"1 regular"],
+  ["Popeyes Cajun Fries (regular)",260,3,38,11,"1 regular"],
+  ["Popeyes Mashed Potatoes & Gravy",120,2,18,5,"1 regular"],
+  ["Popeyes Biscuit",260,4,26,15,"1 biscuit"],
+  ["Popeyes Mac & Cheese",200,5,24,9,"1 regular"],
+  ["Popeyes Coleslaw",200,1,17,14,"1 regular"],
+
+  // ── RAISING CANE'S ──────────────────────────────────────────────────────────
+  ["Raising Cane's Chicken Finger",130,13,7,5,"1 finger"],
+  ["Raising Cane's Box Combo (3 fingers)",570,37,49,23,"3 fingers + fries + slaw + toast"],
+  ["Raising Cane's The Box (4 fingers)",670,46,51,27,"4 fingers + fries + slaw + toast + sauce"],
+  ["Raising Cane's Caniac Combo (6 fingers)",910,63,56,38,"6 fingers + fries + slaw + 2 toast + sauce"],
+  ["Raising Cane's Crinkle Fries",320,4,47,14,"1 regular"],
+  ["Raising Cane's Texas Toast",100,3,13,4,"1 slice"],
+  ["Raising Cane's Coleslaw",140,1,14,9,"1 regular"],
+  ["Raising Cane's Cane's Sauce",190,0,4,19,"2 oz"],
+
+  // ── PANDA EXPRESS ───────────────────────────────────────────────────────────
+  ["Panda Express Orange Chicken",490,23,61,21,"1 entree (5.7oz)"],
+  ["Panda Express Beijing Beef",690,26,72,37,"1 entree"],
+  ["Panda Express Broccoli Beef",150,9,13,7,"1 entree"],
+  ["Panda Express Kung Pao Chicken",290,19,22,15,"1 entree"],
+  ["Panda Express Grilled Teriyaki Chicken",300,36,8,13,"1 entree"],
+  ["Panda Express Honey Walnut Shrimp",430,14,34,25,"1 entree"],
+  ["Panda Express Black Pepper Angus Steak",190,19,13,7,"1 entree"],
+  ["Panda Express String Bean Chicken Breast",190,14,15,9,"1 entree"],
+  ["Panda Express Chow Mein",510,13,80,16,"1 side"],
+  ["Panda Express Fried Rice",620,13,98,21,"1 side"],
+  ["Panda Express White Steamed Rice",380,7,86,0,"1 side"],
+  ["Panda Express Super Greens",90,6,13,2,"1 side"],
+  ["Panda Express Egg Roll",200,6,25,8,"1 egg roll"],
+  ["Panda Express Bowl (1 entree + 1 side)",~820,~28,~110,~25,"1 bowl (approx)"].map((v,i)=>typeof v==='string'?v:v), // skip, handled below
+
+  // ── SUBWAY ───────────────────────────────────────────────────────────────────
+  ["Subway 6\" Turkey Breast",280,18,40,4,"6\" on 9-grain wheat"],
+  ["Subway 6\" Rotisserie-Style Chicken",310,22,42,7,"6\" on 9-grain wheat"],
+  ["Subway 6\" Oven Roasted Turkey",310,22,42,7,"6\" on 9-grain wheat"],
+  ["Subway 6\" Veggie Delite",200,9,38,2,"6\" on 9-grain wheat"],
+  ["Subway 6\" Meatball Marinara",480,22,60,17,"6\" on Italian"],
+  ["Subway 6\" Tuna",480,21,44,24,"6\" on 9-grain wheat"],
+  ["Subway 6\" Italian BMT",410,21,41,17,"6\" on 9-grain wheat"],
+  ["Subway 6\" Spicy Italian",480,21,42,22,"6\" on Italian"],
+  ["Subway 6\" Steak & Cheese",370,26,42,10,"6\" on 9-grain wheat"],
+  ["Subway 12\" Turkey Breast",560,36,80,8,"12\" on 9-grain wheat"],
+  ["Subway 12\" Meatball Marinara",960,44,120,34,"12\" on Italian"],
+  ["Subway Footlong Steak & Cheese",740,52,84,20,"12\" on 9-grain wheat"],
+  ["Subway Wrap Turkey Breast",580,30,68,20,"6\" wrap"],
+  ["Subway Chopped Salad Turkey",170,14,15,5,"salad, no dressing"],
+  ["Subway Cookies (1)",220,2,30,10,"1 cookie"],
+
+  // ── CHIPOTLE ────────────────────────────────────────────────────────────────
+  ["Chipotle Burrito Bowl (chicken, rice, black beans, fajita, mild)",560,42,64,13,"1 bowl"],
+  ["Chipotle Burrito Bowl (steak, rice, black beans, fajita, mild)",490,36,56,12,"1 bowl"],
+  ["Chipotle Burrito Bowl (carnitas, rice, black beans)",490,31,54,16,"1 bowl"],
+  ["Chipotle Burrito Bowl (sofritas, rice, black beans)",420,16,62,13,"1 bowl, vegetarian"],
+  ["Chipotle Burrito (chicken, full)",870,53,102,22,"1 burrito w/ tortilla"],
+  ["Chipotle Burrito (steak, full)",800,47,95,21,"1 burrito w/ tortilla"],
+  ["Chipotle Tacos 3 (chicken, crispy)",480,30,49,17,"3 crispy shell tacos"],
+  ["Chipotle Tacos 3 (steak, soft)",445,27,48,14,"3 soft shell tacos"],
+  ["Chipotle Quesadilla (chicken)",650,38,52,30,"1 quesadilla"],
+  ["Chipotle Salad (chicken, romaine)",315,37,22,11,"1 salad, no dressing"],
+  ["Chipotle Chips",540,7,73,24,"1 large bag"],
+  ["Chipotle Guacamole",230,3,13,22,"side (3.5oz)"],
+  ["Chipotle Sour Cream",120,2,2,11,"side (2oz)"],
+  ["Chipotle Cheese",110,7,1,9,"side (1oz)"],
+
+  // ── PANERA BREAD ────────────────────────────────────────────────────────────
+  ["Panera Broccoli Cheddar Soup (bowl)",360,16,33,20,"1 bowl"],
+  ["Panera Mac & Cheese (bowl)",870,35,108,37,"1 bowl"],
+  ["Panera Turkey Sandwich (half)",330,20,37,9,"half on sourdough"],
+  ["Panera Chipotle Chicken & Bacon (whole)",970,56,82,47,"1 whole sandwich"],
+  ["Panera Caesar Salad (full)",390,16,22,29,"full, with dressing"],
+  ["Panera Fuji Apple Salad with Chicken (full)",570,40,41,28,"full, with dressing"],
+  ["Panera Greek Salad (full)",380,14,21,27,"full, with dressing"],
+  ["Panera Bagel (everything)",290,10,57,2,"1 bagel"],
+  ["Panera Asiago Cheese Bagel",320,11,58,4,"1 bagel"],
+  ["Panera Bread Bowl",640,24,120,6,"1 bread bowl"],
+  ["Panera Green Goddess Salad with Chicken",590,45,23,32,"full"],
+  ["Panera Chicken Noodle Soup (bowl)",130,9,17,3,"1 bowl"],
+
+  // ── DOMINO'S ────────────────────────────────────────────────────────────────
+  ["Domino's Hand Tossed Cheese Pizza (2 slices)",400,16,56,14,"2 slices, medium"],
+  ["Domino's Hand Tossed Pepperoni Pizza (2 slices)",480,20,56,20,"2 slices, medium"],
+  ["Domino's Thin Crust Cheese Pizza (2 slices)",290,14,38,10,"2 slices, medium"],
+  ["Domino's Thin Crust Pepperoni Pizza (2 slices)",360,16,38,18,"2 slices, medium"],
+  ["Domino's Brooklyn Style Cheese Pizza (2 slices)",500,22,64,18,"2 slices, large"],
+  ["Domino's Brooklyn Pepperoni (2 slices)",560,24,64,24,"2 slices, large"],
+  ["Domino's Pan Pizza Cheese (2 slices)",510,18,62,20,"2 slices, medium"],
+  ["Domino's Chicken Wings (8pc)",770,54,0,61,"8 plain wings"],
+  ["Domino's Boneless Wings (8pc)",440,22,46,18,"8 boneless"],
+  ["Domino's Stuffed Cheesy Bread (4 sticks)",750,30,84,32,"4 sticks"],
+  ["Domino's Cinnamon Twists",250,4,48,5,"1 serving"],
+  ["Domino's Marbled Cookie Brownie",340,4,54,12,"1 piece"],
+
+  // ── PIZZA HUT ───────────────────────────────────────────────────────────────
+  ["Pizza Hut Original Pan Cheese (2 slices)",480,20,56,20,"2 slices, medium"],
+  ["Pizza Hut Original Pan Pepperoni (2 slices)",560,24,56,26,"2 slices, medium"],
+  ["Pizza Hut Hand Tossed Cheese (2 slices)",420,18,58,14,"2 slices, medium"],
+  ["Pizza Hut Thin N Crispy Pepperoni (2 slices)",380,18,38,18,"2 slices, medium"],
+  ["Pizza Hut Stuffed Crust Cheese (2 slices)",540,24,64,22,"2 slices, medium"],
+  ["Pizza Hut WingStreet Traditional Wings (8)",600,48,2,44,"8 wings"],
+  ["Pizza Hut Breadsticks (4)",590,14,94,16,"4 sticks"],
+  ["Pizza Hut Cinnamon Sticks (4)",420,8,68,12,"4 sticks"],
+
+  // ── PAPA JOHN'S ─────────────────────────────────────────────────────────────
+  ["Papa John's Original Crust Cheese (2 slices)",460,18,62,16,"2 slices, large"],
+  ["Papa John's Original Crust Pepperoni (2 slices)",520,22,62,22,"2 slices, large"],
+  ["Papa John's Thin Crust Pepperoni (2 slices)",380,18,38,18,"2 slices, large"],
+  ["Papa John's Garlic Parmesan Breadsticks (4)",800,22,112,28,"4 sticks w/ sauce"],
+
+  // ── KFC ─────────────────────────────────────────────────────────────────────
+  ["KFC Original Recipe Chicken (breast)",390,39,11,21,"1 piece"],
+  ["KFC Extra Crispy Chicken (breast)",500,38,18,29,"1 piece"],
+  ["KFC Grilled Chicken (breast)",220,38,0,7,"1 piece"],
+  ["KFC Original Recipe Chicken (thigh)",280,18,9,19,"1 piece"],
+  ["KFC Original Recipe Chicken (drumstick)",130,14,4,7,"1 piece"],
+  ["KFC Chicken Sandwich (Classic)",650,28,69,30,"1 sandwich"],
+  ["KFC Spicy Chicken Sandwich",680,28,71,33,"1 sandwich"],
+  ["KFC Famous Bowl",720,26,82,32,"1 bowl"],
+  ["KFC Pot Pie",790,29,66,45,"1 pie"],
+  ["KFC Chicken Little Sandwich",310,14,30,15,"1 sandwich"],
+  ["KFC 3pc Tenders",310,23,19,15,"3 tenders"],
+  ["KFC Coleslaw (large)",270,2,26,17,"1 large side"],
+  ["KFC Biscuit",180,4,22,9,"1 biscuit"],
+  ["KFC Mashed Potatoes & Gravy",140,3,22,5,"1 regular side"],
+  ["KFC Mac & Cheese (large)",180,6,25,6,"1 large side"],
+
+  // ── STARBUCKS ───────────────────────────────────────────────────────────────
+  ["Starbucks Pike Place Brewed Coffee",5,1,0,0,"Venti 20oz, black"],
+  ["Starbucks Caffe Latte (whole milk)",270,14,21,11,"Grande 16oz"],
+  ["Starbucks Caffe Latte (oat milk)",240,8,31,8,"Grande 16oz"],
+  ["Starbucks Vanilla Latte (2% milk)",250,11,38,6,"Grande 16oz"],
+  ["Starbucks Iced Caramel Macchiato",250,10,34,7,"Grande 16oz"],
+  ["Starbucks Pumpkin Spice Latte (2%)",380,14,52,14,"Grande 16oz"],
+  ["Starbucks Caramel Frappuccino",410,5,66,14,"Grande 16oz"],
+  ["Starbucks Mocha Frappuccino",400,6,63,14,"Grande 16oz"],
+  ["Starbucks Cold Brew",5,0,0,0,"Venti 24oz, black"],
+  ["Starbucks Nitro Cold Brew",5,0,0,0,"Grande 16oz, black"],
+  ["Starbucks Iced Coffee",80,0,20,0,"Grande 16oz, with classic syrup"],
+  ["Starbucks Matcha Green Tea Latte",240,12,35,7,"Grande 16oz, 2%"],
+  ["Starbucks Chai Tea Latte",240,8,45,4,"Grande 16oz, 2%"],
+  ["Starbucks Egg White & Roasted Red Pepper Bites",170,13,13,7,"2 bites"],
+  ["Starbucks Spinach & Feta Wrap",290,20,33,8,"1 wrap"],
+  ["Starbucks Turkey, Provolone & Pesto Sandwich",480,30,44,17,"1 sandwich"],
+  ["Starbucks Butter Croissant",260,5,34,11,"1 croissant"],
+  ["Starbucks Chocolate Chip Cookie",360,4,49,17,"1 cookie"],
+  ["Starbucks Blueberry Muffin",380,5,62,12,"1 muffin"],
+  ["Starbucks Banana Nut Bread",420,5,59,19,"1 loaf slice"],
+
+  // ── DUNKIN' ─────────────────────────────────────────────────────────────────
+  ["Dunkin' Iced Coffee (medium)",260,3,44,9,"medium w/ cream & sugar"],
+  ["Dunkin' Cold Brew (medium)",20,1,3,0,"medium, black"],
+  ["Dunkin' Hot Coffee (medium)",10,0,2,0,"medium, black"],
+  ["Dunkin' Latte (medium, oat)",210,5,35,5,"medium"],
+  ["Dunkin' Original Glazed Donut",240,4,31,11,"1 donut"],
+  ["Dunkin' Chocolate Frosted Donut",300,3,40,14,"1 donut"],
+  ["Dunkin' Jelly Donut",270,4,44,8,"1 donut"],
+  ["Dunkin' Croissant",350,8,37,19,"1 croissant"],
+  ["Dunkin' Bagel (everything) with Cream Cheese",540,17,82,15,"1 bagel w/ cream cheese"],
+  ["Dunkin' Egg & Cheese Sandwich",370,17,36,16,"1 on croissant"],
+  ["Dunkin' Wake-Up Wrap (turkey sausage)",290,13,25,15,"1 wrap"],
+  ["Dunkin' Hash Browns",130,1,14,7,"1 order"],
+  ["Dunkin' Munchkins Glazed (5pc)",200,2,28,9,"5 holes"],
+
+  // ── CHILI'S ─────────────────────────────────────────────────────────────────
+  ["Chili's Oldtimer Burger",780,40,55,44,"1 burger"],
+  ["Chili's Big Mouth Burger",1010,56,55,61,"1 burger"],
+  ["Chili's Classic Bacon Burger",1040,58,55,63,"1 burger"],
+  ["Chili's Chicken Crispers",1700,79,189,66,"full order"],
+  ["Chili's Half Rack Baby Back Ribs",720,47,38,38,"half rack"],
+  ["Chili's Full Rack Baby Back Ribs",1340,86,76,76,"full rack"],
+  ["Chili's Classic Sirloin (6oz)",400,48,8,19,"1 steak"],
+  ["Chili's Grilled Chicken Salad",520,44,28,25,"1 salad"],
+  ["Chili's Chicken Fajita Single",490,35,48,14,"1 fajita"],
+  ["Chili's Chips & Salsa",590,9,81,25,"1 appetizer"],
+  ["Chili's Queso (individual)",430,16,38,26,"individual"],
+  ["Chili's Molten Chocolate Cake",1050,14,130,50,"1 dessert"],
+
+  // ── APPLEBEE'S ──────────────────────────────────────────────────────────────
+  ["Applebee's Classic Cheeseburger",1040,55,63,59,"1 burger"],
+  ["Applebee's Double Crunch Shrimp",960,34,106,45,"1 entree"],
+  ["Applebee's Neighborhood Nachos",1430,54,148,67,"full order"],
+  ["Applebee's Grilled Chicken Sandwich",600,43,47,22,"1 sandwich"],
+  ["Applebee's Chicken Tenders Basket",1290,62,101,69,"full order"],
+  ["Applebee's4 Boneless Wings",640,30,68,29,"1 order"],
+  ["Applebee's Classic Riblets (half)",820,46,58,45,"half order"],
+
+  // ── OLIVE GARDEN ────────────────────────────────────────────────────────────
+  ["Olive Garden Fettuccine Alfredo",1200,41,143,52,"full entree"],
+  ["Olive Garden Chicken Parmigiana",1060,76,77,49,"full entree"],
+  ["Olive Garden Eggplant Parmigiana",850,36,94,38,"full entree"],
+  ["Olive Garden Spaghetti with Meat Sauce",970,42,134,25,"full entree"],
+  ["Olive Garden Tour of Italy",1530,73,131,79,"full entree"],
+  ["Olive Garden Chicken & Shrimp Carbonara",1530,70,133,84,"full entree"],
+  ["Olive Garden Breadstick",140,5,25,2,"1 breadstick (no butter)"],
+  ["Olive Garden House Salad (per person)",150,3,10,11,"per person, w/ dressing"],
+
+  // ── OUTBACK STEAKHOUSE ───────────────────────────────────────────────────────
+  ["Outback Victoria's Filet (6oz)",220,38,2,7,"1 steak"],
+  ["Outback NY Strip (14oz)",790,77,3,52,"1 steak"],
+  ["Outback Ribeye (14oz)",980,72,4,76,"1 steak"],
+  ["Outback Sirloin (6oz)",250,39,3,9,"1 steak"],
+  ["Outback Blooming Onion",1950,16,193,123,"full appetizer"],
+  ["Outback Alice Springs Chicken",1007,69,50,56,"1 entree"],
+  ["Outback Grilled Chicken on the Barbie",418,62,5,16,"1 entree"],
+
+  // ── TEXAS ROADHOUSE ─────────────────────────────────────────────────────────
+  ["Texas Roadhouse Sirloin (6oz)",250,48,1,7,"1 steak"],
+  ["Texas Roadhouse Sirloin (12oz)",490,95,2,13,"1 steak"],
+  ["Texas Roadhouse Ribeye (12oz)",780,68,3,56,"1 steak"],
+  ["Texas Roadhouse Grilled Chicken",430,73,3,13,"1 entree"],
+  ["Texas Roadhouse Country Fried Chicken",810,50,74,32,"1 entree"],
+  ["Texas Roadhouse Baby Back Ribs (half rack)",560,34,26,37,"half rack"],
+  ["Texas Roadhouse Rolls with Butter (2)",280,7,38,12,"2 rolls w/ cinnamon butter"],
+  ["Texas Roadhouse Mashed Potatoes",390,7,48,18,"1 regular side"],
+  ["Texas Roadhouse Sweet Potato",270,4,62,1,"1 plain"],
+
+  // ── CRACKER BARREL ───────────────────────────────────────────────────────────
+  ["Cracker Barrel Country Boy Breakfast",680,34,69,27,"full plate"],
+  ["Cracker Barrel Buttermilk Pancakes (3)",580,15,100,13,"3 pancakes"],
+  ["Cracker Barrel Chicken n' Dumplins",480,27,58,16,"1 entree"],
+  ["Cracker Barrel Meatloaf",430,28,28,24,"1 entree"],
+  ["Cracker Barrel Grilled Chicken Tenders",360,61,8,8,"1 entree"],
+
+  // ── IHOP ─────────────────────────────────────────────────────────────────────
+  ["IHOP Original Buttermilk Pancakes (3)",430,10,77,10,"3 pancakes, no syrup"],
+  ["IHOP Blueberry Pancakes (3)",490,10,89,10,"3 pancakes"],
+  ["IHOP Chicken & Waffles",1030,44,91,51,"1 entree"],
+  ["IHOP Big Steak Omelette",600,45,16,40,"1 omelette"],
+  ["IHOP Scrambled Eggs (2)",190,14,1,15,"2 eggs"],
+  ["IHOP Bacon (4 strips)",200,16,1,15,"4 strips"],
+  ["IHOP Sausage Links (4)",320,16,2,28,"4 links"],
+  ["IHOP Country Omelette",760,36,57,41,"1 omelette"],
+
+  // ── DENNY'S ──────────────────────────────────────────────────────────────────
+  ["Denny's Grand Slam",600,31,57,27,"1 plate"],
+  ["Denny's Lumberjack Slam",820,45,83,31,"1 plate"],
+  ["Denny's French Toast Slam",1030,42,133,39,"1 plate"],
+  ["Denny's Classic Burger",840,44,63,46,"1 burger"],
+  ["Denny's Slamburger",1010,53,64,58,"1 burger"],
+  ["Denny's Pancakes (3)",430,8,71,14,"3 pancakes"],
+  ["Denny's Build Your Own Omelette",640,42,14,45,"1 omelette"],
+
+  // ── WINGSTOP ─────────────────────────────────────────────────────────────────
+  ["Wingstop Classic Wings 6pc",540,36,0,44,"6 wings, plain"],
+  ["Wingstop Classic Wings 10pc",900,60,0,74,"10 wings, plain"],
+  ["Wingstop Boneless Wings 6pc",440,21,44,22,"6 boneless"],
+  ["Wingstop Boneless Wings 10pc",740,35,73,36,"10 boneless"],
+  ["Wingstop Louisiana Rub Wings 6pc",540,36,4,44,"6 wings"],
+  ["Wingstop Atomic Wings 6pc",560,36,6,46,"6 wings"],
+  ["Wingstop Large Seasoned Fries",500,7,72,21,"1 large"],
+  ["Wingstop Ranch Dip",220,2,2,23,"2oz"],
+
+  // ── FIVE GUYS ────────────────────────────────────────────────────────────────
+  ["Five Guys Hamburger",700,35,40,43,"1 burger (1 patty)"],
+  ["Five Guys Cheeseburger",780,41,40,49,"1 burger"],
+  ["Five Guys Double Cheeseburger",1020,60,40,67,"1 burger (2 patties)"],
+  ["Five Guys Little Hamburger",490,26,39,26,"1 little burger"],
+  ["Five Guys Little Cheeseburger",550,30,39,30,"1 little burger"],
+  ["Five Guys Bacon Cheeseburger",930,55,40,60,"1 burger"],
+  ["Five Guys BLT",480,18,42,27,"1 BLT"],
+  ["Five Guys Grilled Cheese",430,18,41,23,"1 sandwich"],
+  ["Five Guys Regular Fries",953,19,131,41,"1 regular"],
+  ["Five Guys Little Fries",526,9,71,23,"1 little"],
+  ["Five Guys Regular Shake (vanilla)",500,14,74,18,"1 regular"],
+
+  // ── IN-N-OUT BURGER ──────────────────────────────────────────────────────────
+  ["In-N-Out Hamburger",390,16,41,19,"1 burger"],
+  ["In-N-Out Cheeseburger",480,22,39,27,"1 burger"],
+  ["In-N-Out Double-Double",670,37,39,41,"1 burger"],
+  ["In-N-Out Protein Style (lettuce wrap)",330,18,11,25,"1 burger, no bun"],
+  ["In-N-Out Animal Style Fries",400,6,54,18,"1 order"],
+  ["In-N-Out French Fries",400,7,54,18,"1 order"],
+  ["In-N-Out Chocolate Shake",580,9,82,26,"1 shake"],
+  ["In-N-Out Vanilla Shake",580,9,82,26,"1 shake"],
+
+  // ── SHAKE SHACK ──────────────────────────────────────────────────────────────
+  ["Shake Shack ShackBurger",530,26,40,29,"1 burger"],
+  ["Shake Shack SmokeShack",580,33,40,31,"1 burger"],
+  ["Shake Shack Double ShackBurger",840,51,40,53,"1 burger"],
+  ["Shake Shack Chicken Shack",600,32,50,30,"1 sandwich"],
+  ["Shake Shack Chick'n Shack",610,32,51,30,"1 sandwich"],
+  ["Shake Shack Crinkle Cut Fries",420,7,57,19,"1 order"],
+  ["Shake Shack Vanilla Shake (16oz)",570,12,85,20,"1 shake"],
+  ["Shake Shack Chocolate Shake (16oz)",610,13,91,21,"1 shake"],
+
+  // ── BUFFALO WILD WINGS ───────────────────────────────────────────────────────
+  ["Buffalo Wild Wings Traditional Wings 6pc",430,36,0,30,"6 wings, medium sauce"],
+  ["Buffalo Wild Wings Traditional Wings 12pc",860,72,0,60,"12 wings"],
+  ["Buffalo Wild Wings Boneless Wings 6pc",490,28,48,19,"6 boneless"],
+  ["Buffalo Wild Wings Boneless Wings 12pc",980,56,96,38,"12 boneless"],
+  ["Buffalo Wild Wings Chicken Tenders 4pc",490,40,27,24,"4 tenders"],
+  ["Buffalo Wild Wings Street Tacos (3)",810,36,63,44,"3 tacos"],
+  ["Buffalo Wild Wings Loaded Nachos",1290,55,108,72,"full order"],
+  ["Buffalo Wild Wings Regular Fries",440,5,61,20,"1 regular"],
+
+  // ── JIMMY JOHN'S ─────────────────────────────────────────────────────────────
+  ["Jimmy John's Turkey Tom (#4)",530,25,68,16,"1 regular sub"],
+  ["Jimmy John's Slim 3 (Tuna)",690,23,67,37,"1 regular sub"],
+  ["Jimmy John's Club Lulu (#10)",620,38,68,19,"1 regular sub"],
+  ["Jimmy John's Vito (#5)",650,34,68,26,"1 regular sub"],
+  ["Jimmy John's Pepe (#2)",620,36,68,23,"1 regular sub"],
+  ["Jimmy John's Beach Club (#12)",590,33,69,18,"1 regular sub"],
+  ["Jimmy John's Unwich (Turkey Tom, lettuce wrap)",240,18,7,15,"1 unwich, no bread"],
+  ["Jimmy John's Gargantuan (Giant #20)",1090,65,72,60,"1 giant sub"],
+  ["Jimmy John's Chips",220,3,28,11,"1 bag"],
+  ["Jimmy John's Cookie",420,4,55,20,"1 cookie"],
+
+  // ── JERSEY MIKE'S ────────────────────────────────────────────────────────────
+  ["Jersey Mike's Turkey & Provolone (#7, regular)",580,35,56,22,"1 regular sub"],
+  ["Jersey Mike's Club Supreme (#8, regular)",680,43,56,26,"1 regular sub"],
+  ["Jersey Mike's Italian (#13, regular)",860,48,56,47,"1 regular sub"],
+  ["Jersey Mike's BLT (#13 variation, regular)",620,34,56,25,"1 regular sub"],
+  ["Jersey Mike's Steak & Cheese (regular)",760,50,56,33,"1 regular sub, hot"],
+  ["Jersey Mike's Chicken Philly (regular)",690,49,56,22,"1 regular sub, hot"],
+
+  // ── FIREHOUSE SUBS ────────────────────────────────────────────────────────────
+  ["Firehouse Hook & Ladder (medium)",660,38,71,23,"1 medium sub"],
+  ["Firehouse Turkey Bacon Ranch (medium)",700,40,72,25,"1 medium sub"],
+  ["Firehouse Italian (medium)",820,43,73,36,"1 medium sub"],
+  ["Firehouse Smokehouse Beef & Cheddar (medium)",710,42,73,26,"1 medium sub"],
+
+  // ── ZOES KITCHEN / MEDITERRANEAN ──────────────────────────────────────────
+  ["Zaxby's Signature Chicken Sandwich",560,38,50,21,"1 sandwich"],
+  ["Zaxby's Traditional Wings 5pc",440,26,22,26,"5 wings"],
+  ["Zaxby's Zalad (full, Cobb)",690,43,28,45,"1 salad"],
+  ["Zaxby's Crinkle Fries (regular)",430,5,58,20,"1 regular"],
+
+  // ── HARDEE'S / CARL'S JR ─────────────────────────────────────────────────────
+  ["Hardee's Frisco Thickburger",860,47,56,49,"1 burger"],
+  ["Hardee's Monster Thickburger",1310,72,57,90,"1 burger"],
+  ["Hardee's Original Thickburger (1/3lb)",700,38,51,39,"1 burger"],
+  ["Hardee's Low Carb It (lettuce wrap)",420,34,8,28,"1 burger, no bun"],
+  ["Hardee's Loaded Omelet Biscuit",510,22,41,27,"1 biscuit"],
+  ["Hardee's Medium Fries",430,5,59,20,"1 medium"],
+
+  // ── ARBY'S ─────────────────────────────────────────────────────────────────
+  ["Arby's Classic Roast Beef",360,23,36,14,"1 sandwich"],
+  ["Arby's Double Roast Beef",510,35,36,22,"1 sandwich"],
+  ["Arby's Beef n Cheddar (Classic)",450,22,44,21,"1 sandwich"],
+  ["Arby's Crispy Chicken Sandwich",530,28,57,20,"1 sandwich"],
+  ["Arby's Wagyu Steakhouse Burger",600,31,46,32,"1 burger"],
+  ["Arby's Curly Fries (medium)",400,5,50,20,"1 medium"],
+  ["Arby's Mozzarella Sticks (4pc)",430,15,42,22,"4 sticks"],
+  ["Arby's Shake (Jamocha, medium)",470,11,77,13,"1 medium"],
+
+  // ── DAIRY QUEEN ─────────────────────────────────────────────────────────────
+  ["Dairy Queen DQ Burger",340,17,31,17,"1 burger"],
+  ["Dairy Queen Double Cheeseburger",560,32,31,34,"1 burger"],
+  ["Dairy Queen Crispy Chicken Sandwich",500,19,55,22,"1 sandwich"],
+  ["Dairy Queen Medium Fries",370,4,49,17,"1 medium"],
+  ["Dairy Queen Chicken Strip Basket 4pc",1000,38,102,47,"with fries and toast"],
+  ["Dairy Queen Blizzard Oreo (medium)",680,13,101,23,"1 medium"],
+  ["Dairy Queen Blizzard Reese's (medium)",740,17,103,29,"1 medium"],
+  ["Dairy Queen Vanilla Soft Serve Cone",230,6,38,7,"1 medium cone"],
+  ["Dairy Queen Dipped Cone (chocolate, medium)",330,6,51,11,"1 medium"],
+
+  // ── LONG JOHN SILVER'S ───────────────────────────────────────────────────────
+  ["Long John Silver's Battered Fish (2pc)",360,16,36,18,"2 pieces"],
+  ["Long John Silver's Shrimp (6pc)",130,5,13,7,"6 pieces"],
+  ["Long John Silver's Corn on the Cob",220,4,37,7,"1 cob"],
+  ["Long John Silver's Coleslaw",200,1,16,14,"1 side"],
+  ["Long John Silver's Hushpuppies (4pc)",200,4,32,7,"4 pieces"],
+
+  // ── COOK OUT ────────────────────────────────────────────────────────────────
+  ["Cook Out Big Double Burger",760,44,56,40,"1 burger"],
+  ["Cook Out Regular Burger",390,22,40,16,"1 burger"],
+  ["Cook Out Chicken Strip Tray (3pc)",930,38,113,34,"with fries + hush puppies"],
+  ["Cook Out BBQ Chicken Sandwich",350,23,40,10,"1 sandwich"],
+  ["Cook Out Medium Milkshake (vanilla)",700,15,110,20,"1 shake"],
+
+  // ── BOJANGLES ───────────────────────────────────────────────────────────────
+  ["Bojangles Seasoned Chicken Breast",270,32,10,11,"1 piece"],
+  ["Bojangles Cajun Filet Biscuit",370,21,39,14,"1 biscuit"],
+  ["Bojangles Cajun Pintos",110,7,20,1,"1 side"],
+  ["Bojangles Dirty Rice",165,5,27,5,"1 side"],
+  ["Bojangles Legendary Biscuit",250,5,37,10,"1 biscuit"],
+  ["Bojangles Seasoned Fries (medium)",380,5,52,17,"1 medium"],
+
+  // ── WHATABURGER EXTRAS ─────────────────────────────────────────────────────
+  ["Whataburger Whatachick'n Strips 3pc",630,34,56,28,"3 strips"],
+  ["Whataburger Patty Melt",670,31,63,33,"1 sandwich"],
+  ["Whataburger Jalapeño & Cheese Biscuit",470,16,50,22,"1 biscuit"],
+  ["Whataburger Biscuit Sandwich (egg & cheese)",470,17,48,23,"1 biscuit"],
+  ["Whataburger Honey Butter Chicken Biscuit",540,22,56,24,"1 biscuit"],
+  ["Whataburger Cinnamon Roll",560,8,78,22,"1 roll"],
+];
+
+// Clean the FOOD_DB of any accidentally malformed entries
+const _FOOD_DB_CLEAN = FOOD_DB.filter(f => Array.isArray(f) && f.length>=6 && typeof f[0]==='string' && !isNaN(f[1]));
+// Replace with cleaned version
+FOOD_DB.length = 0;
+_FOOD_DB_CLEAN.forEach(f => FOOD_DB.push(f));
+
+// Search aliases — common abbreviations and alternate names
+const SEARCH_ALIASES = {
+  'mcds':'mcdonald',
+  'mcdonald\'s':'mcdonald',
+  'mcdonalds':'mcdonald',
+  'bk':'burger king',
+  'wawa':'whataburger',
+  'whataburger':'whataburger',
+  'cfa':'chick-fil-a',
+  'chick fil a':'chick-fil-a',
+  'cfla':'chick-fil-a',
+  'sonic drive in':'sonic',
+  'jack':'jack in the box',
+  'bww':'buffalo wild wings',
+  'bdubs':'buffalo wild wings',
+  'jj':'jimmy john',
+  'jersey':'jersey mike',
+  'pb':'peanut butter',
+  'gyo':'greek yogurt',
+  'wb':'whole wheat bread',
+  'ww':'whole wheat',
+  'pro':'protein',
+  'shake':'protein shake',
+};
+
+function searchFoods(q){
+  if(!q||q.trim().length<1)return[];
+  let normalized=q.toLowerCase().trim();
+
+  // Apply aliases
+  Object.entries(SEARCH_ALIASES).forEach(([alias,replacement])=>{
+    if(normalized===alias||normalized.startsWith(alias+' ')){
+      normalized=normalized.replace(alias,replacement);
+    }
+  });
+
+  const terms=normalized.split(/\s+/).filter(Boolean);
+
+  // Score each food
+  const scored=FOOD_DB.map(f=>{
+    const name=f[0].toLowerCase();
+    // Must match all terms
+    const allMatch=terms.every(t=>name.includes(t));
+    if(!allMatch)return null;
+    // Score: earlier match = higher score, exact word match bonus
+    let score=0;
+    terms.forEach(t=>{
+      const idx=name.indexOf(t);
+      if(idx===0)score+=3;
+      else if(idx>0)score+=1;
+      // Bonus for exact word match
+      if(new RegExp(`\\b${t}\\b`).test(name))score+=2;
+    });
+    return{f,score};
+  }).filter(Boolean);
+
+  // Sort by score descending
+  scored.sort((a,b)=>b.score-a.score);
+  return scored.map(s=>s.f).slice(0,40);
+}
+
+function openAddFood(meal){
+  S.pendingMeal=meal;
+  window._pendingFood=null;
+  openModal(`<div class="modal-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="font-size:16px;font-weight:600;">Add to ${meal}</div>
+      <button onclick="closeModal()" style="background:none;border:none;font-size:22px;color:var(--text2);cursor:pointer;padding:0 4px;line-height:1;">×</button>
+    </div>
+
+    <div id="add-food-view">
+      <input type="text" id="food-search-input" placeholder="Search (e.g. chicken, oats, big mac)..." style="margin-bottom:8px;"/>
+      <div id="search-results" style="max-height:230px;overflow-y:auto;margin-bottom:4px;">
+        <div style="font-size:13px;color:var(--text2);padding:12px 0;">Start typing to search ${FOOD_DB.length} common US foods</div>
+      </div>
+
+      <div class="divider" style="margin:12px 0;"></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Scan barcode (packaged food)</div>
+      <button class="btn btn-sm" style="width:100%;padding:11px;margin-bottom:8px;font-size:14px;" onclick="openBarcodeScanner()">Open barcode scanner</button>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <input type="text" id="manual-barcode" placeholder="Or type barcode number..." inputmode="numeric" style="flex:1;"/>
+        <button class="btn btn-primary btn-sm" onclick="lookupManualBarcode()">Look up</button>
+      </div>
+
+      <div class="divider" style="margin:12px 0;"></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Enter manually</div>
+      <input type="text" id="manual-name" placeholder="Food name" style="margin-bottom:8px;"/>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:3px;">Calories</div><input type="number" inputmode="decimal" id="m-cal" placeholder="0"/></div>
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:3px;">Protein (g)</div><input type="number" inputmode="decimal" id="m-pro" placeholder="0"/></div>
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:3px;">Carbs (g)</div><input type="number" inputmode="decimal" id="m-carb" placeholder="0"/></div>
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:3px;">Fat (g)</div><input type="number" inputmode="decimal" id="m-fat" placeholder="0"/></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary btn-sm" onclick="addManualFood()">Add entry</button>
+        <button class="btn btn-sm" onclick="saveManualAsTemplate()">Save as meal</button>
+      </div>
+    </div>
+
+    <div id="serving-picker-view" style="display:none;padding-top:4px;">
+      <div id="serving-food-info" style="background:var(--bg2);border-radius:var(--radius);padding:12px;margin-bottom:14px;"></div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:8px;">How many servings?</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+        <input type="number" id="serving-count" value="1" min="0.25" step="0.25" inputmode="decimal" style="width:84px;font-size:18px;text-align:center;"/>
+        <span style="font-size:14px;color:var(--text2);" id="serving-unit-label">× 1 serving</span>
+      </div>
+      <div id="serving-macro-preview" style="font-size:13px;color:var(--text2);margin-bottom:18px;min-height:20px;"></div>
+      <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px;margin-bottom:8px;" onclick="confirmFoodAdd()">Add to ${meal}</button>
+      <button class="btn btn-ghost" style="width:100%;padding:10px;" onclick="showAddFoodView()">← Back to search</button>
+    </div>`);
+
+  // Attach search listener AFTER render — key to fixing focus loss
+  setTimeout(()=>{
+    const input=document.getElementById('food-search-input');
+    if(input){
+      input.addEventListener('input',function(){renderSearchResults(this.value);});
+      input.focus();
+    }
+    document.getElementById('serving-count')?.addEventListener('input',updateServingPreview);
+  },150);
+}
+
+function renderSearchResults(q){
+  const resEl=document.getElementById('search-results');
+  if(!resEl)return;
+  if(!q||q.trim().length<1){
+    resEl.innerHTML=`<div style="font-size:13px;color:var(--text2);padding:12px 0;">Search ${FOOD_DB.length.toLocaleString()}+ foods — try "whataburger", "big mac", "chicken breast"</div>`;
+    return;
+  }
+  const results=searchFoods(q);
+  if(!results.length){
+    resEl.innerHTML=`<div style="font-size:13px;color:var(--text2);padding:12px 0;">No results for "<strong>${q}</strong>". Try barcode scanner or manual entry below.</div>`;
+    return;
+  }
+  resEl.innerHTML=results.map(f=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer;gap:10px;" onclick="selectLocalFood(${FOOD_DB.indexOf(f)})">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:500;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f[0].split('(')[0].trim()}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:1px;">${f[5]} &middot; ${f[1]} kcal &middot; ${f[2]}g pro &middot; ${f[3]}g carb &middot; ${f[4]}g fat</div>
+      </div>
+      <button class="btn btn-primary btn-sm" style="flex-shrink:0;" onclick="event.stopPropagation();selectLocalFood(${FOOD_DB.indexOf(f)})">Add</button>
+    </div>`).join('');
+}
+
+
+function selectLocalFood(idx){
+  const f=FOOD_DB[idx];
+  if(!f)return;
+  showServingPicker(f[0],f[1],f[2],f[3],f[4],f[5]);
+}
+
+function showAddFoodView(){
+  document.getElementById('add-food-view').style.display='';
+  document.getElementById('serving-picker-view').style.display='none';
+  setTimeout(()=>{
+    const input=document.getElementById('food-search-input');
+    if(input)input.addEventListener('input',function(){renderSearchResults(this.value);});
+    document.getElementById('serving-count')?.addEventListener('input',updateServingPreview);
+  },50);
+}
+
+function showServingPicker(name,cal,pro,carb,fat,servingLabel){
+  window._pendingFood={name,cal,pro,carb,fat,servingLabel};
+  document.getElementById('add-food-view').style.display='none';
+  document.getElementById('serving-picker-view').style.display='';
+  document.getElementById('serving-food-info').innerHTML=`
+    <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${name.length>55?name.slice(0,55)+'…':name}</div>
+    <div style="font-size:12px;color:var(--text2);">Per ${servingLabel}: ${cal} kcal · ${pro}g protein · ${carb}g carbs · ${fat}g fat</div>`;
+  document.getElementById('serving-unit-label').textContent=`× ${servingLabel}`;
+  const sc=document.getElementById('serving-count');
+  if(sc){sc.value=1;sc.addEventListener('input',updateServingPreview);}
+  updateServingPreview();
+}
+
+function updateServingPreview(){
+  const s=parseFloat(document.getElementById('serving-count')?.value)||1;
+  const f=window._pendingFood;if(!f)return;
+  const el=document.getElementById('serving-macro-preview');
+  if(el)el.textContent=`Total: ${Math.round(f.cal*s)} kcal · ${parseFloat((f.pro*s).toFixed(1))}g protein · ${parseFloat((f.carb*s).toFixed(1))}g carbs · ${parseFloat((f.fat*s).toFixed(1))}g fat`;
+}
+
+function confirmFoodAdd(){
+  const s=parseFloat(document.getElementById('serving-count')?.value)||1;
+  const f=window._pendingFood;if(!f)return;
+  const today=todayStr();getDiary(today);
+  const meal=S.pendingMeal||'Snacks';
+  S.diary[today][meal].push({
+    name:`${f.name}${s!==1?` ×${s}`:''}`,
+    cal:Math.round(f.cal*s),
+    pro:parseFloat((f.pro*s).toFixed(1)),
+    carb:parseFloat((f.carb*s).toFixed(1)),
+    fat:parseFloat((f.fat*s).toFixed(1)),
+  });
+  save();closeModal();setTab('nutrition');
+}
+
+function addManualFood(){
+  const name=document.getElementById('manual-name')?.value||'Entry';
+  const cal=parseFloat(document.getElementById('m-cal')?.value)||0;
+  const pro=parseFloat(document.getElementById('m-pro')?.value)||0;
+  const carb=parseFloat(document.getElementById('m-carb')?.value)||0;
+  const fat=parseFloat(document.getElementById('m-fat')?.value)||0;
+  const today=todayStr();getDiary(today);
+  const meal=S.pendingMeal||'Snacks';
+  S.diary[today][meal].push({name,cal,pro,carb,fat});
+  save();closeModal();setTab('nutrition');
+}
+
+function saveManualAsTemplate(){
+  const name=document.getElementById('manual-name')?.value||'Saved meal';
+  const cal=parseFloat(document.getElementById('m-cal')?.value)||0;
+  const pro=parseFloat(document.getElementById('m-pro')?.value)||0;
+  const carb=parseFloat(document.getElementById('m-carb')?.value)||0;
+  const fat=parseFloat(document.getElementById('m-fat')?.value)||0;
+  S.mealTemplates.push({name,cal,pro,carb,fat});
+  save();closeModal();setTab('nutrition');
+}
+
+// ─── BARCODE ──────────────────────────────────────────────────────────────────
+
+async function lookupBarcode(barcode){
+  const resEl=document.getElementById('search-results');
+  if(resEl)resEl.innerHTML=`<div style="text-align:center;padding:18px 0;"><div class="spinner"></div><div style="font-size:13px;color:var(--text2);margin-top:10px;">Looking up barcode...</div></div>`;
+  try{
+    const resp=await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+    if(!resp.ok)throw new Error('Network error');
+    const data=await resp.json();
+    if(data.status!==1||!data.product){
+      if(resEl)resEl.innerHTML=`<div style="font-size:13px;color:var(--text2);text-align:center;padding:12px 0;">Barcode not found. Use manual entry below.</div>`;
+      return;
+    }
+    const p=data.product;
+    const n=p.nutriments||{};
+    const servingG=parseFloat(p.serving_quantity)||100;
+    const ratio=servingG/100;
+    const name=(p.product_name_en||p.product_name||'Scanned item').trim();
+    const brand=p.brands?p.brands.split(',')[0].trim():'';
+    const fullName=name+(brand&&!name.toLowerCase().includes(brand.toLowerCase())?` (${brand})`:'');
+    const cal=Math.round(n['energy-kcal_serving']!==undefined?n['energy-kcal_serving']:(n['energy-kcal_100g']||0)*ratio);
+    const pro=parseFloat(((n['proteins_serving']!==undefined?n['proteins_serving']:(n['proteins_100g']||0)*ratio)||0).toFixed(1));
+    const carb=parseFloat(((n['carbohydrates_serving']!==undefined?n['carbohydrates_serving']:(n['carbohydrates_100g']||0)*ratio)||0).toFixed(1));
+    const fat=parseFloat(((n['fat_serving']!==undefined?n['fat_serving']:(n['fat_100g']||0)*ratio)||0).toFixed(1));
+    const servingLabel=p.serving_size||`${servingG}g`;
+    const img=p.image_front_small_url||'';
+    if(resEl)resEl.innerHTML=`<div style="display:flex;gap:10px;align-items:center;padding:8px 0;">
+      ${img?`<img src="${img}" style="width:50px;height:50px;object-fit:contain;border-radius:8px;background:var(--bg2);padding:3px;flex-shrink:0;" onerror="this.style.display='none'"/>`:''}
+      <div><div style="font-size:14px;font-weight:600;">${fullName}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px;">${cal} kcal · ${pro}g pro · per ${servingLabel}</div></div>
+    </div>`;
+    showServingPicker(fullName,cal,pro,carb,fat,servingLabel);
+  } catch(e){
+    if(resEl)resEl.innerHTML=`<div style="font-size:13px;color:var(--text2);text-align:center;padding:12px 0;">Lookup failed. Check connection or use manual entry.</div>`;
+  }
+}
+
+// ─── WORKOUT TAB ──────────────────────────────────────────────────────────────
+function renderWorkoutTab(){
+  if(S.workoutActive&&S.currentSession)return renderActiveWorkout();
+  const dn=cycleDay(S.cycleStart);
+  const baseSession=getActiveCycle().find(d=>d.day===dn);
+  const session=getEffectiveSession(baseSession);
+  const isHomeDay=baseSession.loc==='home';
+  const done=S.history.find(h=>h.date===todayStr()&&h.cycleDay===dn)?.completed;
+  const r=getReadiness();
+  return`
+    <div style="font-size:20px;font-weight:600;margin-bottom:14px;">Workout</div>
+    ${r<6?`<div class="alert" style="background:var(--rbg);color:var(--rtxt);">Low readiness today (${r}/10) — consider reducing sets by 1 per exercise.</div>`:''}
+    ${isHomeDay?`<div style="background:${S.gymOverride?'var(--bbg)':'var(--bg2)'};border:0.5px solid ${S.gymOverride?'var(--blue)':'var(--border)'};border-radius:var(--radius);padding:10px 13px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+      <div><div style="font-size:13px;font-weight:500;color:${S.gymOverride?'var(--btxt)':'var(--text)'};">${S.gymOverride?'OT gym workout active':'Picked up OT? Switch to gym'}</div></div>
+      <div class="toggle ${S.gymOverride?'on':''}" onclick="toggleGymOverride()" ${S.gymOverride?'style="background:var(--blue);border-color:var(--blue);"':''}><div class="toggle-knob"></div></div>
+    </div>`:''}
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:3px;">${session.title} <span style="font-size:13px;font-weight:400;color:var(--text2);">· ${session.sub}</span></div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">${session.label} · ${session.dur}</div>
+      ${done
+        ?`<div style="background:var(--gbg);border-radius:var(--radius);padding:10px;text-align:center;color:var(--gtxt);font-weight:600;">Completed today</div>`
+        :`<button class="btn btn-primary" style="width:100%;padding:12px;" onclick="startWorkoutFlow(${dn})">Start today's workout</button>`}
+    </div>
+    <div class="section-title">All sessions</div>
+    ${getActiveCycle().map(d=>{const eff=getEffectiveSession(d);const loc=getSessionLoc(d);
+      return`<div class="card" style="padding:11px 14px;cursor:pointer;" onclick="previewSession(${d.day})">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-size:14px;font-weight:500;">${eff.title}</div><div style="font-size:12px;color:var(--text2);">${eff.sub} · ${eff.dur}</div></div>
+          <span class="badge ${loc==='gym'?'badge-gym':'badge-home'}">${loc==='gym'?'Gym':'Home'}</span>
+        </div>
+      </div>`;}).join('')}`;
+}
+
+function renderActiveWorkout(){
+  const session=S.currentSession;
+  const total=session.ex.reduce((a,e)=>a+e.sets,0);
+  const done=Object.values(S.log).reduce((a,ex)=>a+Object.values(ex).filter(s=>s?.done).length,0);
+  const pct=Math.round((done/total)*100);
+  return`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div><div class="label">${session.label}</div><div style="font-size:20px;font-weight:600;">${session.title}</div></div>
+      <div style="font-size:14px;color:var(--text2);font-variant-numeric:tabular-nums;" id="elapsed-display">${fmtTime(S.elapsed)}</div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+        <span style="font-size:13px;color:var(--text2);">Progress</span>
+        <span style="font-size:13px;font-weight:600;" id="progress-label">${done}/${total}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div id="timer-area"></div>
+    <div id="pr-flash-area"></div>
+    ${session.warmup?`<div class="warmup"><span style="font-weight:600;">Warm-up</span> ${session.warmup}</div>`:''}
+    <div id="exercises-area">${session.ex.map((ex,ei)=>buildExCard(ex,ei)).join('')}</div>
+    <div style="margin-top:12px;"><div class="label" style="margin-bottom:6px;">Session notes</div>
+      <textarea id="session-notes" placeholder="Left shoulder tight, had a call at 3am, felt strong...">${S.sessionNotes||''}</textarea></div>
+    <button class="btn" id="complete-btn" onclick="completeWorkout()" style="width:100%;padding:13px;margin-top:12px;font-size:15px;font-weight:600;">${pct===100?'Complete workout':'Finish session ('+pct+'% done)'}</button>`;
+}
+
+function buildExCard(ex,ei){
+  const dayNum=S.currentSession.day;
+  const prev=[...S.history].reverse().find(h=>h.cycleDay===dayNum);
+  const prevData=prev?.log?.[ei];
+  const prevStr=prevData?Object.values(prevData).map((s,i)=>s?.weight?`S${i+1}:${s.weight}×${s.reps}`:null).filter(Boolean).join(' '):null;
+  const pr=S.prs[ex.name];
+
+  // Get target weight from progression engine
+  const target=getTarget(ex.name,dayNum);
+  const targetW=S.isDeloadSession&&target.targetWeight?Math.round(target.targetWeight*0.6):target.targetWeight;
+
+  // Progression badge
+  const progBadge=target.isIncrease
+    ?`<span style="font-size:11px;background:var(--gbg);color:var(--gtxt);border-radius:4px;padding:2px 7px;font-weight:600;">↑ Add ${getIncrement(ex.name)} lbs</span>`
+    :target.lastWeight
+    ?`<span style="font-size:11px;background:var(--bg2);color:var(--text2);border-radius:4px;padding:2px 7px;">Hold — hit all reps</span>`
+    :`<span style="font-size:11px;background:var(--bg2);color:var(--text2);border-radius:4px;padding:2px 7px;">First time — set baseline</span>`;
+
+  return`<div class="card" id="ex-card-${ei}" style="margin-bottom:9px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;cursor:pointer;" onclick="toggleEx(${ei})">
+      <div style="flex:1;">
+        <div style="font-size:15px;font-weight:600;" id="ex-name-${ei}">${ex.name}</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:2px;">${ex.sets} sets · ${ex.reps}${ex.rest>0?' · '+ex.rest+'s rest':''}</div>
+        <div style="margin-top:5px;">${progBadge}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;padding-left:8px;">
+        <span style="font-size:13px;color:var(--text2);" id="ex-count-${ei}">0/${ex.sets}</span>
+        <span style="font-size:12px;color:var(--text2);" id="ex-arrow-${ei}">▲</span>
+      </div>
+    </div>
+    <div id="ex-body-${ei}" style="border-top:0.5px solid var(--border);margin-top:9px;padding-top:9px;">
+      ${ex.notes?`<div class="notes-tip">${ex.notes}</div>`:''}
+      ${pr?`<div style="font-size:12px;color:var(--text2);margin-bottom:6px;">All-time PR: <span style="color:var(--orange);font-weight:600;">${pr} lbs</span></div>`:''}
+      ${targetW?`<div style="font-size:13px;background:var(--obg);color:var(--otxt);border-radius:8px;padding:7px 11px;margin-bottom:8px;font-weight:500;">
+        🎯 Target: <strong>${targetW} lbs</strong>${target.isIncrease?` (was ${target.lastWeight} lbs)`:''}
+      </div>`:''}
+      ${prevStr&&!targetW?`<div class="prev-data">Last session: ${prevStr}</div>`:''}
+      <div style="display:flex;gap:7px;margin-bottom:9px;flex-wrap:wrap;">
+        <button class="btn btn-sm" style="border-color:var(--blue);color:var(--btxt);background:var(--bbg);" onclick="showHowTo(${ei})">How to</button>
+        ${ex.alts?.length?`<button class="btn btn-sm" onclick="showAlts(${ei})">Swap</button>`:''}
+      </div>
+      ${Array.from({length:ex.sets}).map((_,si)=>`
+        <div class="set-row" id="set-row-${ei}-${si}">
+          <div class="set-num" id="set-num-${ei}-${si}">${si+1}</div>
+          <input type="number" inputmode="decimal" placeholder="${targetW||'lbs'}" id="w-${ei}-${si}" style="width:66px;" value="${si===0&&targetW?targetW:''}"/>
+          <span style="color:var(--text2);font-size:14px;">×</span>
+          <input type="number" inputmode="numeric" placeholder="reps" id="r-${ei}-${si}" style="width:60px;"/>
+          <button class="log-btn" id="log-btn-${ei}-${si}" onclick="logSet(${ei},${si},${ex.rest})">Log</button>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function toggleEx(ei){const b=document.getElementById(`ex-body-${ei}`),a=document.getElementById(`ex-arrow-${ei}`);const h=b.style.display==='none';b.style.display=h?'':'none';a.textContent=h?'▲':'▼';}
+
+function startWorkoutFlow(dayNum){
+  const r=getReadiness();
+  if(r<5){openModal(`<div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:8px;">Low readiness — ${r}/10</div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:16px;">Based on your sleep and check-in. Training hard on low recovery increases injury risk.</div>
+    <div style="display:flex;flex-direction:column;gap:9px;">
+      <button class="btn btn-primary" style="padding:12px;" onclick="closeModal();doStartWorkout(${dayNum},true)">Start at reduced intensity (recommended)</button>
+      <button class="btn" style="padding:12px;" onclick="closeModal();doStartWorkout(${dayNum},false)">Start at full intensity</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Skip today</button>
+    </div>`);
+  } else {doStartWorkout(dayNum,false);}
+}
+
+function doStartWorkout(dayNum,reduced){
+  const base=getActiveCycle().find(d=>d.day===dayNum);
+  const session=getEffectiveSession(base);
+  S.currentSession=JSON.parse(JSON.stringify(session));
+  S.isDeloadSession=shouldDeload();
+  if(reduced||S.isDeloadSession)S.currentSession.ex.forEach(e=>e.sets=Math.max(2,e.sets-1));
+  S.log={};S.elapsed=0;S.sessionNotes='';S.workoutActive=true;
+  clearInterval(elapsedInt);elapsedInt=null;
+  save();setTab('workout');
+}
+
+function completeWorkout(){
+  clearInterval(elapsedInt);elapsedInt=null;
+  const notes=document.getElementById('session-notes')?.value||'';
+
+  // Calculate progression summary
+  const session=S.currentSession;
+  let newPRs=0,progressions=0;
+  session.ex.forEach((ex,ei)=>{
+    const exLog=S.log[ei];if(!exLog)return;
+    const sets=Object.values(exLog).filter(s=>s?.done&&s.weight);
+    if(!sets.length)return;
+    const maxW=Math.max(...sets.map(s=>parseFloat(s.weight)||0));
+    if(maxW>0&&(!S.prs[ex.name]||maxW>S.prs[ex.name])){newPRs++;}
+    const prev=getLastWeight(ex.name,session.day);
+    if(prev&&maxW>prev.weight)progressions++;
+  });
+
+  S.history.push({date:todayStr(),cycleDay:session.day,log:S.log,elapsed:S.elapsed,completed:true,notes});
+  S.cycleCount++;S.workoutActive=false;S.isDeloadSession=false;S.currentSession=null;
+  save();
+
+  // Show completion summary
+  const elapsed=fmtTime(S.elapsed);
+  const totalSets=Object.values(S.log).reduce((a,ex)=>a+Object.values(ex).filter(s=>s?.done).length,0);
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:22px;font-weight:700;text-align:center;margin-bottom:4px;">Session complete 🎉</div>
+    <div style="font-size:14px;color:var(--text2);text-align:center;margin-bottom:18px;">${elapsed} · ${totalSets} sets logged</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px;">
+      <div class="metric"><div class="label">Time</div><div class="metric-val" style="font-size:18px;">${elapsed}</div></div>
+      <div class="metric"><div class="label">Sets done</div><div class="metric-val" style="font-size:18px;">${totalSets}</div></div>
+      <div class="metric"><div class="label">PRs hit</div><div class="metric-val" style="font-size:18px;color:var(--orange);">${newPRs}</div></div>
+      <div class="metric"><div class="label">Weight ↑</div><div class="metric-val" style="font-size:18px;color:var(--teal);">${progressions}</div></div>
+    </div>
+    ${newPRs>0?`<div style="background:var(--obg);border-radius:var(--radius);padding:11px 14px;margin-bottom:12px;font-size:14px;color:var(--otxt);">🏆 ${newPRs} new PR${newPRs>1?'s':''} — this is what progression looks like.</div>`:''}
+    <div style="background:var(--gbg);border-radius:var(--radius);padding:11px 14px;margin-bottom:16px;font-size:13px;color:var(--gtxt);line-height:1.5;">
+      <strong>Next session targets</strong> will be automatically calculated — come back tomorrow and check your home screen.
+    </div>
+    <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px;" onclick="closeModal();setTab('home')">Back to home</button>`);
+}
+
+function previewSession(dayNum){
+  const d=getEffectiveSession(getActiveCycle().find(c=>c.day===dayNum));
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:3px;">${d.title}</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">${d.label} · ${d.dur}</div>
+    ${d.warmup?`<div class="warmup" style="margin-bottom:12px;"><span style="font-weight:600;">Warm-up</span> ${d.warmup}</div>`:''}
+    ${d.ex.map(e=>`<div style="padding:9px 0;border-bottom:0.5px solid var(--border);">
+      <div style="font-size:14px;font-weight:600;">${e.name} <span style="font-weight:400;color:var(--text2);">${e.sets}×${e.reps}</span></div>
+      <div style="font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5;">${e.notes}</div>
+    </div>`).join('')}`);
+}
+
+function showHowTo(ei){
+  const ex=S.currentSession.ex[ei];
+  const steps=ex.notes.split('. ').filter(Boolean);
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:12px;">${ex.name}</div>
+    <div style="background:var(--bg2);border-radius:var(--radius);padding:14px;margin-bottom:12px;">
+      ${steps.map((s,i)=>`<div style="display:flex;gap:11px;align-items:flex-start;${i<steps.length-1?'margin-bottom:12px':''}">
+        <div style="min-width:26px;height:26px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;">${i+1}</div>
+        <div style="font-size:14px;line-height:1.55;">${s}</div>
+      </div>`).join('')}
+    </div>
+    <div style="font-size:13px;color:var(--text2);">${ex.sets} sets · ${ex.reps} · ${ex.rest>0?ex.rest+'s rest':'no rest timer'}</div>
+    ${S.prs[ex.name]?`<div style="font-size:13px;color:var(--orange);margin-top:5px;font-weight:600;">Current PR: ${S.prs[ex.name]} lbs</div>`:''}`);
+}
+
+function showAlts(ei){
+  const ex=S.currentSession.ex[ei];
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:5px;">Swap: ${ex.name}</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:13px;">Replaces this exercise for this session only.</div>
+    ${ex.alts.map((alt,ai)=>`<div style="padding:12px 14px;border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:8px;cursor:pointer;" onclick="swapExercise(${ei},${ai})">
+      <div style="font-size:14px;font-weight:600;">${alt.name}</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:2px;">${alt.why}</div>
+    </div>`).join('')}`);
+}
+
+function swapExercise(ei,ai){
+  const orig=S.currentSession.ex[ei],alt=orig.alts[ai];
+  S.currentSession.ex[ei]={name:alt.name,sets:orig.sets,reps:orig.reps,rest:orig.rest,notes:alt.why,alts:[{name:orig.name,why:"Original exercise"},...orig.alts.filter((_,i)=>i!==ai)]};
+  closeModal();setTab('workout');
+}
+
+function logSet(ei,si,rest){
+  const w=document.getElementById(`w-${ei}-${si}`)?.value;
+  const r=document.getElementById(`r-${ei}-${si}`)?.value;
+  if(!S.log[ei])S.log[ei]={};
+  S.log[ei][si]={weight:w||null,reps:r||null,done:true};
+  const sn=document.getElementById(`set-num-${ei}-${si}`);
+  const lb=document.getElementById(`log-btn-${ei}-${si}`);
+  const ex=S.currentSession.ex[ei];
+  const wNum=parseFloat(w)||0;
+  if(wNum>0&&(!S.prs[ex.name]||wNum>S.prs[ex.name])){
+    S.prs[ex.name]=wNum;save();
+    const fa=document.getElementById('pr-flash-area');
+    if(fa){fa.innerHTML=`<div class="pr-flash">🏆 New PR on ${ex.name}: ${wNum} lbs!</div>`;setTimeout(()=>{if(fa)fa.innerHTML='';},4000);}
+    if(sn)sn.className='set-num pr';
+  } else {if(sn)sn.className='set-num done';}
+  if(lb){lb.className='log-btn done';lb.textContent='Done';}
+  const dc=Object.values(S.log[ei]).filter(s=>s?.done).length;
+  const ct=document.getElementById(`ex-count-${ei}`);if(ct)ct.textContent=`${dc}/${ex.sets}`;
+  if(dc===ex.sets){const en=document.getElementById(`ex-name-${ei}`);if(en)en.style.color='var(--teal)';}
+  if(rest>0)startTimer(rest);
+  updateProgress();
+}
+
+function startTimer(secs){
+  clearInterval(timerInt);S.timerLeft=secs;S.timerTotal=secs;renderTimer();
+  timerInt=setInterval(()=>{S.timerLeft--;if(S.timerLeft<=0){clearInterval(timerInt);const ta=document.getElementById('timer-area');if(ta)ta.innerHTML='';return;}renderTimer();},1000);
+}
+
+function renderTimer(){
+  const pct=Math.round((S.timerLeft/S.timerTotal)*100);
+  const color=S.timerLeft>S.timerTotal*0.4?'var(--teal)':S.timerLeft>S.timerTotal*0.2?'var(--amber)':'var(--red)';
+  const ta=document.getElementById('timer-area');
+  if(ta)ta.innerHTML=`<div style="background:var(--bg);border:0.5px solid ${color};border-radius:var(--radius-lg);padding:13px;text-align:center;margin-bottom:11px;">
+    <div style="font-size:11px;color:var(--text2);margin-bottom:3px;letter-spacing:0.06em;text-transform:uppercase;">Rest</div>
+    <div style="font-size:40px;font-weight:700;color:${color};line-height:1;font-variant-numeric:tabular-nums;">${fmtTime(S.timerLeft)}</div>
+    <div class="progress-bar" style="margin:7px 0;"><div class="progress-fill" style="width:${pct}%;background:${color};"></div></div>
+    <button class="btn btn-sm" onclick="clearInterval(timerInt);document.getElementById('timer-area').innerHTML=''">Skip</button>
+  </div>`;
+}
+
+function updateProgress(){
+  const s=S.currentSession;if(!s)return;
+  const total=s.ex.reduce((a,e)=>a+e.sets,0);
+  const done=Object.values(S.log).reduce((a,ex)=>a+Object.values(ex).filter(s=>s?.done).length,0);
+  const pct=Math.round((done/total)*100);
+  const pf=document.getElementById('progress-fill');if(pf)pf.style.width=pct+'%';
+  const pl=document.getElementById('progress-label');if(pl)pl.textContent=`${done}/${total}`;
+  const btn=document.getElementById('complete-btn');
+  if(btn){if(pct===100){btn.style.background='var(--teal)';btn.style.color='#fff';btn.style.border='none';btn.textContent='Complete workout';}
+  else{btn.style.background='';btn.style.color='';btn.style.border='';btn.textContent=`Finish session (${pct}% done)`;}}
+}
+
+function toggleGymOverride(){S.gymOverride=!S.gymOverride;save();setTab(activeTab);}
+
+// ─── AI PLAN TAB ──────────────────────────────────────────────────────────────
+function renderAIPlan(){
+  const hasPlan=!!S.customCycle;
+  const meta=S.aiPlanMeta;
+  const cycle=getActiveCycle();
+
+  return`
+    <div style="font-size:20px;font-weight:600;margin-bottom:4px;">AI Workout Plan</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">Describe your goals and Claude builds a custom program for your 48/96 schedule</div>
+
+    ${hasPlan?`
+      <div style="background:var(--gbg);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--gtxt);">Custom AI plan active</div>
+          <div style="font-size:12px;color:var(--gtxt);margin-top:2px;">${meta?.goal||''} · Generated ${meta?.generatedAt||''}</div>
+        </div>
+        <button class="btn btn-sm" onclick="clearAIPlan()">Reset to default</button>
+      </div>
+      <div class="section-title">Your current plan (${cycle.length} days)</div>
+      ${cycle.map(d=>`<div class="card" style="padding:11px 14px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div style="font-size:14px;font-weight:600;">${d.title}</div>
+          <span class="badge ${d.loc==='gym'?'badge-gym':'badge-home'}">${d.loc==='gym'?'Gym':'Home'}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2);">${d.sub} · ${d.dur}</div>
+        ${d.ex?`<div style="margin-top:8px;border-top:0.5px solid var(--border);padding-top:8px;">${d.ex.map(e=>`<div style="font-size:13px;padding:2px 0;">${e.name} <span style="color:var(--text2);">${e.sets}×${e.reps}</span></div>`).join('')}</div>`:''}
+      </div>`).join('')}
+    `:''}
+
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:12px;">Build a new plan</div>
+
+      <div style="margin-bottom:12px;">
+        <div class="label" style="margin-bottom:6px;">Primary goal</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;" id="goal-btns">
+          ${['Build muscle','Lose fat','Build strength','Athletic performance','General fitness'].map(g=>`
+            <button class="btn btn-sm" id="goal-${g.replace(/ /g,'-')}" onclick="selectAIOption('goal','${g}',this)"
+              style="text-align:left;padding:9px 12px;">${g}</button>`).join('')}
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div class="label" style="margin-bottom:6px;">Experience level</div>
+        <div style="display:flex;gap:7px;">
+          ${['Beginner','Intermediate','Advanced'].map(e=>`
+            <button class="btn btn-sm" id="exp-${e}" onclick="selectAIOption('exp','${e}',this)" style="flex:1;">${e}</button>`).join('')}
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div class="label" style="margin-bottom:6px;">Session length preference</div>
+        <div style="display:flex;gap:7px;">
+          ${['30–45 min','45–60 min','60–75 min'].map(t=>`
+            <button class="btn btn-sm" id="dur-${t.replace(/ /g,'')}" onclick="selectAIOption('dur','${t}',this)" style="flex:1;font-size:12px;">${t}</button>`).join('')}
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div class="label" style="margin-bottom:6px;">Gym equipment available</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;" id="equip-btns">
+          ${['Full gym (barbells, cables, machines)','Dumbbells only','Kettlebells + bands','Bodyweight only'].map(e=>`
+            <button class="btn btn-sm" id="equip-${e.slice(0,10).replace(/ /g,'')}" onclick="selectAIOption('equip','${e}',this)"
+              style="text-align:left;">${e}</button>`).join('')}
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div class="label" style="margin-bottom:6px;">Any injuries or limitations? (optional)</div>
+        <textarea id="ai-injuries" placeholder="e.g. Bad left knee, lower back issues, shoulder impingement..." style="min-height:56px;"></textarea>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div class="label" style="margin-bottom:6px;">Anything else Claude should know? (optional)</div>
+        <textarea id="ai-notes" placeholder="e.g. I want to focus on upper body, I hate running, I work night shifts sometimes..."></textarea>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="generateAIPlan()" id="generate-btn">
+        Generate my plan with AI
+      </button>
+      <div id="ai-status" style="font-size:13px;color:var(--text2);text-align:center;margin-top:10px;min-height:18px;"></div>
+    </div>`;
+}
+
+// Track selections
+const _aiSelections={goal:null,exp:'Intermediate',dur:'45–60 min',equip:'Full gym (barbells, cables, machines)'};
+
+function selectAIOption(type,val,btn){
+  _aiSelections[type]=val;
+  // Highlight selected button in its group
+  const groupMap={goal:'goal-btns',exp:null,dur:null,equip:'equip-btns'};
+  if(groupMap[type]){
+    document.getElementById(groupMap[type])?.querySelectorAll('.btn').forEach(b=>{
+      b.style.background='';b.style.color='';b.style.borderColor='';
+    });
+  } else {
+    // For flex row groups find siblings
+    btn.parentElement?.querySelectorAll('.btn').forEach(b=>{
+      b.style.background='';b.style.color='';b.style.borderColor='';
+    });
+  }
+  btn.style.background='var(--orange)';btn.style.color='white';btn.style.borderColor='var(--orange)';
+}
+
+async function generateAIPlan(){
+  if(!_aiSelections.goal){
+    document.getElementById('ai-status').textContent='Please select a primary goal first.';
+    return;
+  }
+
+  const btn=document.getElementById('generate-btn');
+  const statusEl=document.getElementById('ai-status');
+  btn.disabled=true;btn.textContent='Generating...';
+  statusEl.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:8px;"><div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Claude is building your plan...</div>`;
+
+  const lw=S.wtHistory.length?S.wtHistory[S.wtHistory.length-1].wt:S.weightLbs;
+  const injuries=document.getElementById('ai-injuries')?.value||'None';
+  const notes=document.getElementById('ai-notes')?.value||'';
+
+  const prompt=`You are an expert strength and conditioning coach. Build a complete workout program for a firefighter on a 48/96 shift schedule (2 days on duty, 4 days off).
+
+USER PROFILE:
+- Goal: ${_aiSelections.goal}
+- Experience: ${_aiSelections.exp}
+- Session length: ${_aiSelections.dur}
+- Available equipment: ${_aiSelections.equip}
+- Injuries/limitations: ${injuries}
+- Current weight: ${lw?lw+' lbs':'unknown'}
+- Additional notes: ${notes||'None'}
+
+SCHEDULE CONSTRAINTS:
+- Days 1-2: On duty at fire station (gym available: dumbbells, barbells, cables, leg press, leg curl, leg extension, cardio)
+- Days 3-6: Off duty (home equipment: kettlebells, resistance bands, bodyweight)
+- The cycle repeats every 6 days continuously
+
+REQUIREMENTS:
+- Design exactly 6 sessions (one per cycle day)
+- Each session must match the location (gym vs home) for that day
+- Day 6 should be active recovery or rest
+- Joint-friendly exercise selection — firefighters need longevity
+- All exercises must be achievable with the stated equipment
+- Include 5-6 exercises per session with sets, reps, and rest periods
+- Include warm-up notes for each session
+- Include form cues for each exercise (1-2 sentences)
+
+Respond ONLY with a valid JSON array. No explanation, no markdown, no backticks. Just raw JSON.
+
+Format:
+[
+  {
+    "day": 1,
+    "label": "Day 1 — On Duty",
+    "title": "Push",
+    "sub": "Chest · Shoulders · Triceps",
+    "loc": "gym",
+    "dur": "45–55 min",
+    "warmup": "5 min bike · band pull-aparts ×15 · arm circles",
+    "ex": [
+      {
+        "name": "Incline DB Press",
+        "sets": 4,
+        "reps": "8–10",
+        "rest": 90,
+        "notes": "Form cue here.",
+        "alts": [{"name": "DB Floor Press", "why": "Protects shoulder"}]
+      }
+    ]
+  }
+]`;
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:4000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+
+    if(!resp.ok){
+      const err=await resp.json().catch(()=>({}));
+      throw new Error(err.error?.message||'API error '+resp.status);
+    }
+
+    const data=await resp.json();
+    const raw=data.content?.[0]?.text||'';
+
+    // Strip any accidental markdown fences
+    const cleaned=raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    const plan=JSON.parse(cleaned);
+
+    if(!Array.isArray(plan)||plan.length<4)throw new Error('Invalid plan format');
+
+    // Validate each day has required fields
+    plan.forEach((d,i)=>{
+      if(!d.day)d.day=i+1;
+      if(!d.loc)d.loc=d.day<=2?'gym':'home';
+      if(!d.ex)d.ex=[];
+      d.ex.forEach(e=>{
+        if(!e.alts)e.alts=[];
+        if(!e.rest)e.rest=60;
+      });
+    });
+
+    S.customCycle=plan;
+    S.aiPlanMeta={
+      goal:_aiSelections.goal,
+      exp:_aiSelections.exp,
+      injuries:injuries!=='None'?injuries:'',
+      generatedAt:new Date().toLocaleDateString(),
+    };
+    save();
+
+    btn.disabled=false;btn.textContent='Generate my plan with AI';
+    statusEl.innerHTML=`<span style="color:var(--teal);font-weight:600;">✓ Plan generated and activated!</span>`;
+    setTimeout(()=>setTab('aiplan'),1200);
+
+  } catch(e){
+    btn.disabled=false;btn.textContent='Generate my plan with AI';
+    statusEl.innerHTML=`<span style="color:var(--red);">Error: ${e.message}. Try again.</span>`;
+  }
+}
+
+function clearAIPlan(){
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:8px;">Reset to default plan?</div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:18px;">Your AI-generated plan will be removed and the built-in firefighter program will be restored. Your workout history, PRs, and all other data are unaffected.</div>
+    <button class="btn btn-primary" style="width:100%;padding:12px;margin-bottom:9px;" onclick="S.customCycle=null;S.aiPlanMeta=null;save();closeModal();setTab('aiplan');">Yes, reset to default</button>
+    <button class="btn btn-ghost" style="width:100%;padding:12px;" onclick="closeModal()">Cancel</button>`);
+}
+
+
+function suppTakenToday(id){
+  const today=todayStr();
+  return !!(S.suppLog[today]&&S.suppLog[today][id]&&S.suppLog[today][id].length>0);
+}
+
+function logSupp(id){
+  const today=todayStr();
+  if(!S.suppLog[today])S.suppLog[today]={};
+  if(!S.suppLog[today][id])S.suppLog[today][id]=[];
+  S.suppLog[today][id].push(Date.now());
+  save();setTab('supps');
+}
+
+function unlogSupp(id){
+  const today=todayStr();
+  if(S.suppLog[today]&&S.suppLog[today][id]){
+    S.suppLog[today][id].pop();
+    if(!S.suppLog[today][id].length)delete S.suppLog[today][id];
+  }
+  save();setTab('supps');
+}
+
+function renderSupps(){
+  const today=todayStr();
+  const active=S.suppList.filter(s=>s.active);
+  const taken=active.filter(s=>suppTakenToday(s.id)).length;
+  const streak=getSuppStreak();
+
+  // Weekly adherence for creatine specifically (most important for efficacy)
+  const creatineStreak=getSpecificStreak('creatine');
+
+  return`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div><div style="font-size:20px;font-weight:600;">Supplements</div>
+        <div style="font-size:13px;color:var(--text2);">${taken}/${active.length} taken today</div></div>
+      <button class="btn btn-sm" onclick="showSuppSettings()">Manage</button>
+    </div>
+
+    <!-- Daily progress bar -->
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:13px;font-weight:600;">Today's progress</span>
+        <span style="font-size:13px;color:${taken===active.length?'var(--teal)':'var(--text2)'};">${taken===active.length?'All done ✓':taken+' of '+active.length}</span>
+      </div>
+      <div class="progress-bar" style="height:8px;margin-bottom:10px;">
+        <div class="progress-fill" style="width:${active.length?Math.round((taken/active.length)*100):0}%;background:var(--teal);"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="metric"><div class="label">Daily streak</div><div class="metric-val" style="font-size:18px;color:var(--orange);">${streak}<span style="font-size:12px;color:var(--text2);"> days</span></div></div>
+        <div class="metric"><div class="label">Creatine streak</div><div class="metric-val" style="font-size:18px;color:var(--teal);">${creatineStreak}<span style="font-size:12px;color:var(--text2);"> days</span></div></div>
+      </div>
+    </div>
+
+    <!-- Supplement cards -->
+    ${active.length===0?`<div style="font-size:14px;color:var(--text2);text-align:center;padding:30px 0;">No active supplements.<br/>Tap Manage to add some.</div>`:
+      active.map(s=>{
+        const done=suppTakenToday(s.id);
+        const count=S.suppLog[today]?.[s.id]?.length||0;
+        return`<div class="card" style="margin-bottom:9px;border-left:3px solid ${done?'var(--teal)':'var(--border2)'};border-radius:0 var(--radius-lg) var(--radius-lg) 0;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:600;${done?'color:var(--teal);':''}">${s.name}</div>
+              <div style="font-size:13px;color:var(--text2);margin-top:2px;">${s.dose} ${s.unit} · ${s.times.join(', ')}</div>
+              ${s.notes?`<div style="font-size:12px;color:var(--text2);margin-top:4px;font-style:italic;">${s.notes}</div>`:''}
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-left:12px;">
+              ${done
+                ?`<button class="btn btn-teal btn-sm" onclick="unlogSupp('${s.id}')">✓ Taken${count>1?` ×${count}`:''}</button>`
+                :`<button class="btn btn-primary btn-sm" onclick="logSupp('${s.id}')">Log dose</button>`}
+              ${s.id==='creatine'&&count===0?`<button class="btn btn-sm" style="font-size:11px;" onclick="logSupp('${s.id}')">2nd dose</button>`:''}
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+
+    <!-- Inactive supplements -->
+    ${S.suppList.filter(s=>!s.active).length?`
+      <div class="section-title" style="margin-top:4px;">Inactive</div>
+      ${S.suppList.filter(s=>!s.active).map(s=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:0.5px solid var(--border);">
+          <div><div style="font-size:14px;color:var(--text2);">${s.name}</div><div style="font-size:12px;color:var(--text3);">${s.dose} ${s.unit}</div></div>
+          <button class="btn btn-sm" onclick="toggleSuppActive('${s.id}')">Activate</button>
+        </div>`).join('')}`:''}
+
+    <!-- Creatine info card -->
+    <div class="card" style="margin-top:12px;background:var(--gbg);">
+      <div style="font-size:13px;font-weight:600;color:var(--gtxt);margin-bottom:6px;">Creatine — consistency is everything</div>
+      <div style="font-size:12px;color:var(--gtxt);line-height:1.6;">Takes ~4 weeks of daily use to fully saturate muscle stores. Missing days undoes progress. 5g daily, every day — even rest days. No loading phase needed.</div>
+    </div>`;
+}
+
+function getSuppStreak(){
+  const active=S.suppList.filter(s=>s.active);
+  if(!active.length)return 0;
+  let streak=0;
+  for(let i=0;i<90;i++){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    const dayLog=S.suppLog[ds]||{};
+    const allTaken=active.every(s=>dayLog[s.id]?.length>0);
+    if(allTaken)streak++;else if(i>0)break;
+  }
+  return streak;
+}
+
+function getSpecificStreak(id){
+  let streak=0;
+  for(let i=0;i<90;i++){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    if(S.suppLog[ds]?.[id]?.length>0)streak++;else if(i>0)break;
+  }
+  return streak;
+}
+
+function toggleSuppActive(id){
+  const s=S.suppList.find(s=>s.id===id);
+  if(s){s.active=!s.active;save();}
+  refreshSuppSettings();
+  setTab('supps');
+}
+
+function refreshSuppSettings(){
+  const listEl=document.getElementById('supp-list-edit');
+  if(!listEl)return;
+  listEl.innerHTML=buildSuppListHTML();
+}
+
+function buildSuppListHTML(){
+  return S.suppList.map((s,i)=>`
+    <div style="padding:11px 0;border-bottom:0.5px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;">${s.name}</div>
+          <div style="font-size:12px;color:var(--text2);">${s.dose} ${s.unit} · ${s.times.join(', ')}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-left:12px;">
+          <div style="text-align:right;">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:3px;">${s.active?'Active':'Inactive'}</div>
+            <div class="toggle ${s.active?'on':''}" onclick="toggleSuppActive('${s.id}')" style="${s.active?'background:var(--teal);border-color:var(--teal);':''}"><div class="toggle-knob"></div></div>
+          </div>
+          <button onclick="deleteSuppInline(${i})" style="background:var(--rbg);border:none;color:var(--rtxt);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;">Remove</button>
+        </div>
+      </div>
+      ${s.notes?`<div style="font-size:11px;color:var(--text3);font-style:italic;">${s.notes}</div>`:''}
+    </div>`).join('');
+}
+
+function showSuppSettings(){
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:14px;">Manage supplements</div>
+    <div id="supp-list-edit">${buildSuppListHTML()}</div>
+
+    <div style="margin-top:16px;padding-top:14px;border-top:0.5px solid var(--border);">
+      <div style="font-size:14px;font-weight:600;margin-bottom:10px;">Add new supplement</div>
+      <input type="text" id="new-supp-name" placeholder="Name (e.g. Vitamin C, Protein)" style="margin-bottom:8px;"/>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:3px;">Dose amount</div>
+          <input type="number" id="new-supp-dose" placeholder="5" inputmode="decimal" style="width:100%;"/>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:3px;">Unit</div>
+          <input type="text" id="new-supp-unit" placeholder="g, mg, IU, tablet..." style="width:100%;"/>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:3px;">When to take</div>
+      <div style="display:flex;gap:7px;margin-bottom:8px;">
+        ${['Morning','Pre-workout','Post-workout','Night'].map(t=>`<button id="time-${t}" class="btn btn-sm" onclick="toggleSuppTime('${t}')" style="flex:1;font-size:12px;">${t}</button>`).join('')}
+      </div>
+      <input type="text" id="new-supp-notes" placeholder="Notes (optional, e.g. take with food)" style="margin-bottom:12px;"/>
+      <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="addNewSupp()">Add supplement</button>
+    </div>`);
+}
+
+let _newSuppTimes=['Morning'];
+
+function toggleSuppTime(t){
+  if(_newSuppTimes.includes(t))_newSuppTimes=_newSuppTimes.filter(x=>x!==t);
+  else _newSuppTimes.push(t);
+  ['Morning','Pre-workout','Post-workout','Night'].forEach(time=>{
+    const btn=document.getElementById('time-'+time);
+    if(btn){
+      btn.className='btn btn-sm';
+      if(_newSuppTimes.includes(time)){btn.style.background='var(--teal)';btn.style.color='white';btn.style.borderColor='var(--teal)';}
+      else{btn.style.background='';btn.style.color='';btn.style.borderColor='';}
+    }
+  });
+}
+
+function addNewSupp(){
+  const name=document.getElementById('new-supp-name')?.value?.trim();
+  if(!name){
+    const el=document.getElementById('new-supp-name');
+    if(el){el.style.borderColor='var(--red)';el.placeholder='Name is required';}
+    return;
+  }
+  const dose=parseFloat(document.getElementById('new-supp-dose')?.value)||1;
+  const unit=document.getElementById('new-supp-unit')?.value?.trim()||'tablet';
+  const notes=document.getElementById('new-supp-notes')?.value?.trim()||'';
+  const times=_newSuppTimes.length?[..._newSuppTimes]:['Morning'];
+  const id='supp-'+Date.now();
+  S.suppList.push({id,name,dose,unit,times,notes,active:true});
+  _newSuppTimes=['Morning'];
+  save();closeModal();setTab('supps');
+}
+
+function deleteSuppInline(idx){
+  const s=S.suppList[idx];
+  if(!s)return;
+  // Replace the row with a confirm UI inline — no confirm() dialog needed
+  const listEl=document.getElementById('supp-list-edit');
+  if(!listEl)return;
+  const rows=listEl.querySelectorAll('[data-supp-idx]');
+  // Re-render with confirm state for this index
+  listEl.innerHTML=S.suppList.map((sup,i)=>{
+    if(i===idx)return`
+      <div style="padding:11px 0;border-bottom:0.5px solid var(--border);background:var(--rbg);border-radius:var(--radius);padding:12px;margin-bottom:4px;">
+        <div style="font-size:14px;font-weight:600;color:var(--rtxt);margin-bottom:8px;">Remove "${sup.name}"?</div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="confirmDeleteSupp(${i})" style="flex:1;background:var(--red);color:white;border:none;border-radius:8px;padding:9px;font-size:14px;font-weight:600;cursor:pointer;">Yes, remove</button>
+          <button onclick="refreshSuppSettings()" style="flex:1;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;padding:9px;font-size:14px;cursor:pointer;">Cancel</button>
+        </div>
+      </div>`;
+    return`
+      <div style="padding:11px 0;border-bottom:0.5px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="flex:1;"><div style="font-size:14px;font-weight:600;">${sup.name}</div>
+            <div style="font-size:12px;color:var(--text2);">${sup.dose} ${sup.unit} · ${sup.active?'Active':'Inactive'}</div></div>
+          <div style="display:flex;align-items:center;gap:10px;margin-left:12px;">
+            <div class="toggle ${sup.active?'on':''}" onclick="toggleSuppActive('${sup.id}')" style="${sup.active?'background:var(--teal);border-color:var(--teal);':''}"><div class="toggle-knob"></div></div>
+            <button onclick="deleteSuppInline(${i})" style="background:var(--rbg);border:none;color:var(--rtxt);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;">Remove</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function confirmDeleteSupp(idx){
+  S.suppList.splice(idx,1);
+  save();refreshSuppSettings();setTab('supps');
+}
+
+// ─── BARCODE SCANNER ──────────────────────────────────────────────────────────
+let _zxingReader=null;
+let _scanStream=null;
+let _scanActive=false;
+
+function openBarcodeScanner(){
+  _scanActive=true;
+  // Use z-index 999 so the nav bar (z-index 100) is still below,
+  // but we add our own nav row so user can always escape
+  document.getElementById('modal-area').innerHTML=`
+    <div style="position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;max-width:500px;margin:0 auto;">
+      <!-- Header with explicit back -->
+      <div style="padding:16px 16px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:0.5px solid var(--border);background:var(--bg);">
+        <button onclick="closeBarcodeScanner()" style="background:none;border:none;font-size:15px;color:var(--orange);cursor:pointer;padding:4px 0;font-family:inherit;font-weight:600;">← Back</button>
+        <div style="font-size:15px;font-weight:600;">Scan barcode</div>
+        <button onclick="closeBarcodeScanner();setTab('nutrition')" style="background:none;border:none;font-size:13px;color:var(--text2);cursor:pointer;padding:4px 0;font-family:inherit;">Diary</button>
+      </div>
+
+      <!-- Camera viewfinder -->
+      <div style="position:relative;background:#111;width:100%;flex-shrink:0;" id="viewfinder-wrap">
+        <video id="scanner-video" style="width:100%;display:block;max-height:55vw;object-fit:cover;" playsinline muted></video>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+          <div id="scan-frame" style="width:70%;height:35%;border:2.5px solid var(--orange);border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.5);transition:border-color 0.2s;"></div>
+        </div>
+      </div>
+
+      <!-- Scrollable content below camera -->
+      <div style="flex:1;overflow-y:auto;padding:14px 16px 30px;">
+        <div id="scanner-status" style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:14px;min-height:18px;">Starting camera...</div>
+
+        <!-- Result area -->
+        <div id="scan-result-area"></div>
+
+        <!-- Manual entry -->
+        <div style="background:var(--bg2);border-radius:var(--radius);padding:13px;margin-bottom:12px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Enter barcode manually</div>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="scanner-manual" placeholder="e.g. 049000028911" inputmode="numeric" style="flex:1;" onkeydown="if(event.key==='Enter')doManualLookup()"/>
+            <button class="btn btn-primary btn-sm" onclick="doManualLookup()">Look up</button>
+          </div>
+        </div>
+
+        <div style="font-size:12px;color:var(--text3);text-align:center;line-height:1.5;">
+          Point the barcode at the orange frame.<br/>Hold steady — good lighting helps.<br/>
+          Scanning: EAN-13 · UPC-A · UPC-E · EAN-8
+        </div>
+      </div>
+    </div>`;
+
+  startZXingScanner();
+}
+
+async function startZXingScanner(){
+  const statusEl=document.getElementById('scanner-status');
+  const videoEl=document.getElementById('scanner-video');
+  if(!videoEl||!_scanActive)return;
+
+  if(!window.ZXing){
+    if(statusEl)statusEl.textContent='Loading scanner library...';
+    try{
+      await new Promise((resolve,reject)=>{
+        const s=document.createElement('script');
+        s.src='https://cdn.jsdelivr.net/npm/@zxing/library@0.18.6/umd/index.min.js';
+        s.onload=resolve;s.onerror=()=>reject(new Error('load failed'));
+        document.head.appendChild(s);
+      });
+    } catch(e){
+      if(statusEl)statusEl.textContent='Scanner library unavailable. Use manual entry below.';
+      return;
+    }
+  }
+
+  if(!window.ZXing){if(statusEl)statusEl.textContent='Scanner unavailable. Use manual entry.';return;}
+
+  try{
+    _scanStream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080},focusMode:'continuous'}
+    });
+  } catch(e){
+    if(statusEl){
+      if(e.name==='NotAllowedError')
+        statusEl.innerHTML='Camera permission denied.<br/>Settings → Safari → Camera → Allow';
+      else
+        statusEl.textContent='Camera unavailable. Use manual entry below.';
+    }
+    return;
+  }
+
+  if(!_scanActive){_scanStream.getTracks().forEach(t=>t.stop());_scanStream=null;return;}
+
+  videoEl.srcObject=_scanStream;
+  try{await videoEl.play();}catch(e){return;}
+  if(statusEl)statusEl.textContent='Align barcode with the frame';
+
+  const hints=new Map([
+    [window.ZXing.DecodeHintType.POSSIBLE_FORMATS,[
+      window.ZXing.BarcodeFormat.EAN_13,
+      window.ZXing.BarcodeFormat.EAN_8,
+      window.ZXing.BarcodeFormat.UPC_A,
+      window.ZXing.BarcodeFormat.UPC_E,
+      window.ZXing.BarcodeFormat.CODE_128,
+    ]],
+    [window.ZXing.DecodeHintType.TRY_HARDER,true],
+  ]);
+
+  _zxingReader=new window.ZXing.BrowserMultiFormatReader(hints);
+
+  // Manually poll frames — more reliable than decodeFromStream on iOS Safari
+  const canvas=document.createElement('canvas');
+  const ctx=canvas.getContext('2d');
+
+  async function pollFrame(){
+    if(!_scanActive||!videoEl.srcObject)return;
+    if(videoEl.readyState===videoEl.HAVE_ENOUGH_DATA&&videoEl.videoWidth>0){
+      canvas.width=videoEl.videoWidth;
+      canvas.height=videoEl.videoHeight;
+      ctx.drawImage(videoEl,0,0);
+      try{
+        const luminanceSource=new window.ZXing.HTMLCanvasElementLuminanceSource(canvas);
+        const binaryBitmap=new window.ZXing.BinaryBitmap(new window.ZXing.HybridBinarizer(luminanceSource));
+        const result=_zxingReader.decodeBitmap(binaryBitmap);
+        if(result){
+          const code=result.getText();
+          _scanActive=false;
+          // Flash frame green
+          const frame=document.getElementById('scan-frame');
+          if(frame)frame.style.borderColor='var(--teal)';
+          if(statusEl)statusEl.textContent='✓ Barcode found — looking up...';
+          stopScanStream();
+          doBarcodeLookup(code);
+          return;
+        }
+      } catch(e){/* no barcode in this frame — keep polling */}
+    }
+    if(_scanActive)setTimeout(pollFrame,120);
+  }
+  setTimeout(pollFrame,500);
+}
+
+function stopScanStream(){
+  if(_zxingReader){try{_zxingReader.reset();}catch(e){}_zxingReader=null;}
+  if(_scanStream){_scanStream.getTracks().forEach(t=>t.stop());_scanStream=null;}
+  const v=document.getElementById('scanner-video');
+  if(v&&v.srcObject){try{v.srcObject.getTracks().forEach(t=>t.stop());}catch(e){}v.srcObject=null;}
+}
+
+function closeBarcodeScanner(){
+  _scanActive=false;
+  stopScanStream();
+  closeModal();
+  if(S.pendingMeal)openAddFood(S.pendingMeal);
+}
+
+function doManualLookup(){
+  const val=document.getElementById('scanner-manual')?.value?.trim();
+  if(!val||val.length<4)return;
+  _scanActive=false;
+  stopScanStream();
+  doBarcodeLookup(val);
+}
+
+async function doBarcodeLookup(barcode){
+  const resultEl=document.getElementById('scan-result-area');
+  const statusEl=document.getElementById('scanner-status');
+  if(resultEl)resultEl.innerHTML=`
+    <div style="background:var(--bg2);border-radius:var(--radius);padding:16px;text-align:center;margin-bottom:12px;">
+      <div class="spinner" style="margin:0 auto 10px;"></div>
+      <div style="font-size:13px;color:var(--text2);">Looking up ${barcode}...</div>
+    </div>`;
+  try{
+    const resp=await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+    if(!resp.ok)throw new Error('Network error '+resp.status);
+    const data=await resp.json();
+
+    if(data.status!==1||!data.product){
+      if(resultEl)resultEl.innerHTML=`
+        <div style="background:var(--rbg);border-radius:var(--radius);padding:14px;margin-bottom:12px;">
+          <div style="font-size:14px;font-weight:600;color:var(--rtxt);margin-bottom:4px;">Product not found</div>
+          <div style="font-size:13px;color:var(--rtxt);">Barcode ${barcode} wasn't in the database. Try the manual entry form below or add it to your diary manually.</div>
+        </div>`;
+      return;
+    }
+
+    const p=data.product;
+    const n=p.nutriments||{};
+    const servingG=parseFloat(p.serving_quantity)||100;
+    const ratio=servingG/100;
+    const name=(p.product_name_en||p.product_name||'Scanned item').trim();
+    const brand=p.brands?p.brands.split(',')[0].trim():'';
+    const fullName=name+(brand&&!name.toLowerCase().includes(brand.toLowerCase())?` (${brand})`:'');
+    const cal=Math.round(n['energy-kcal_serving']!=null?n['energy-kcal_serving']:(n['energy-kcal_100g']||0)*ratio);
+    const pro=parseFloat(((n['proteins_serving']!=null?n['proteins_serving']:(n['proteins_100g']||0)*ratio)||0).toFixed(1));
+    const carb=parseFloat(((n['carbohydrates_serving']!=null?n['carbohydrates_serving']:(n['carbohydrates_100g']||0)*ratio)||0).toFixed(1));
+    const fat=parseFloat(((n['fat_serving']!=null?n['fat_serving']:(n['fat_100g']||0)*ratio)||0).toFixed(1));
+    const servingLabel=p.serving_size||`${servingG}g`;
+    const img=p.image_front_small_url||'';
+
+    if(resultEl)resultEl.innerHTML=`
+      <div style="background:var(--gbg);border-radius:var(--radius);padding:14px;margin-bottom:12px;">
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px;">
+          ${img?`<img src="${img}" style="width:56px;height:56px;object-fit:contain;border-radius:8px;background:white;padding:3px;flex-shrink:0;" onerror="this.style.display='none'"/>`:''}
+          <div>
+            <div style="font-size:15px;font-weight:600;color:var(--gtxt);">${fullName}</div>
+            <div style="font-size:12px;color:var(--gtxt);margin-top:3px;">Per ${servingLabel}</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:14px;">
+          <div style="text-align:center;background:white;border-radius:6px;padding:8px 4px;">
+            <div style="font-size:16px;font-weight:700;color:var(--orange);">${cal}</div>
+            <div style="font-size:10px;color:var(--text2);">kcal</div>
+          </div>
+          <div style="text-align:center;background:white;border-radius:6px;padding:8px 4px;">
+            <div style="font-size:16px;font-weight:700;color:var(--teal);">${pro}g</div>
+            <div style="font-size:10px;color:var(--text2);">protein</div>
+          </div>
+          <div style="text-align:center;background:white;border-radius:6px;padding:8px 4px;">
+            <div style="font-size:16px;font-weight:700;color:var(--blue);">${carb}g</div>
+            <div style="font-size:10px;color:var(--text2);">carbs</div>
+          </div>
+          <div style="text-align:center;background:white;border-radius:6px;padding:8px 4px;">
+            <div style="font-size:16px;font-weight:700;color:var(--amber);">${fat}g</div>
+            <div style="font-size:10px;color:var(--text2);">fat</div>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:7px;color:var(--gtxt);">How many servings?</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;">
+          <input type="number" id="scan-servings" value="1" min="0.25" step="0.25" inputmode="decimal" style="width:80px;font-size:16px;text-align:center;" oninput="updateScanPreview(${cal},${pro},${carb},${fat})"/>
+          <span style="font-size:13px;color:var(--gtxt);">× ${servingLabel}</span>
+        </div>
+        <div id="scan-serving-preview" style="font-size:12px;color:var(--gtxt);margin-bottom:12px;">${cal} kcal · ${pro}g protein total</div>
+        <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px;" onclick="addBarcodeResult('${fullName.replace(/'/g,"\\'")}',${cal},${pro},${carb},${fat})">
+          Add to ${S.pendingMeal||'diary'}
+        </button>
+      </div>`;
+
+    if(statusEl)statusEl.textContent='';
+
+  } catch(e){
+    if(resultEl)resultEl.innerHTML=`
+      <div style="background:var(--rbg);border-radius:var(--radius);padding:14px;margin-bottom:12px;">
+        <div style="font-size:14px;font-weight:600;color:var(--rtxt);margin-bottom:4px;">Lookup failed</div>
+        <div style="font-size:13px;color:var(--rtxt);">Check your internet connection and try again, or enter the food manually.</div>
+        <button class="btn btn-sm" style="margin-top:10px;width:100%;" onclick="doBarcodeLookup('${barcode}')">Retry</button>
+      </div>`;
+  }
+}
+
+function updateScanPreview(cal,pro,carb,fat){
+  const s=parseFloat(document.getElementById('scan-servings')?.value)||1;
+  const el=document.getElementById('scan-serving-preview');
+  if(el)el.textContent=`${Math.round(cal*s)} kcal · ${parseFloat((pro*s).toFixed(1))}g protein · ${parseFloat((carb*s).toFixed(1))}g carbs · ${parseFloat((fat*s).toFixed(1))}g fat`;
+}
+
+function addBarcodeResult(name,cal,pro,carb,fat){
+  const s=parseFloat(document.getElementById('scan-servings')?.value)||1;
+  const today=todayStr();getDiary(today);
+  const meal=S.pendingMeal||'Snacks';
+  S.diary[today][meal].push({
+    name:`${name}${s!==1?` ×${s}`:''}`,
+    cal:Math.round(cal*s),
+    pro:parseFloat((pro*s).toFixed(1)),
+    carb:parseFloat((carb*s).toFixed(1)),
+    fat:parseFloat((fat*s).toFixed(1)),
+  });
+  save();
+  _scanActive=false;
+  stopScanStream();
+  closeModal();
+  setTab('nutrition');
+}
+
+// Keep lookupBarcode and lookupManualBarcode working from the add food modal too
+function lookupManualBarcode(){
+  const val=document.getElementById('manual-barcode')?.value?.trim();
+  if(!val||val.length<4)return;
+  // Open full scanner screen and trigger lookup immediately
+  S.pendingMeal=S.pendingMeal||'Snacks';
+  openBarcodeScanner();
+  setTimeout(()=>doBarcodeLookup(val),400);
+}
+
+
+// ─── BODY TAB ─────────────────────────────────────────────────────────────────
+function renderBody(){
+  const lw=S.wtHistory.length?S.wtHistory[S.wtHistory.length-1].wt:S.weightLbs;
+  const pw=S.wtHistory.length>1?S.wtHistory[S.wtHistory.length-2].wt:null;
+  const chg=lw&&pw?((lw-pw)>0?'+':'')+(lw-pw).toFixed(1):null;
+  const bmi=lw&&S.heightFt?((lw/((S.heightFt*12+(S.heightIn||0))**2))*703).toFixed(1):'-';
+  const kg=lw?lbsToKg(lw):null;
+  const htCm=S.heightFt?(S.heightFt*12+(S.heightIn||0))*2.54:175;
+  const tdee=kg?Math.round((10*kg+6.25*htCm-5*30+5)*1.55):null;
+  const calGoal=getCalGoal();
+  const proGoal=getProteinGoal();
+  const diffLbs=lw&&S.goalWt?parseFloat((S.goalWt-lw).toFixed(1)):null;
+  const lastM=S.measurements.length?S.measurements[S.measurements.length-1]:null;
+  return`
+    <div style="font-size:20px;font-weight:600;margin-bottom:13px;">Body & Stats</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px;">
+      <div class="metric"><div class="label">Height</div><div class="metric-val">${S.heightFt?`${S.heightFt}'${S.heightIn||0}"`:'-'}</div></div>
+      <div class="metric"><div class="label">Weight</div><div class="metric-val">${lw?lw+' lbs':'-'}${chg?`<span style="font-size:13px;color:${parseFloat(chg)>0?'var(--red)':'var(--teal)'}"> ${chg}</span>`:''}</div></div>
+      <div class="metric"><div class="label">Goal</div><div class="metric-val" style="color:var(--orange);">${S.goalWt?S.goalWt+' lbs':'-'}</div></div>
+      <div class="metric"><div class="label">BMI</div><div class="metric-val">${bmi}</div></div>
+    </div>
+    ${lw&&S.goalWt&&diffLbs?`<div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:10px;">Build to ${S.goalWt} lbs</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px;">
+        <div class="metric"><div class="label">Daily calories</div><div class="metric-val" style="font-size:15px;color:var(--orange);">${calGoal.toLocaleString()}</div></div>
+        <div class="metric"><div class="label">Daily protein</div><div class="metric-val" style="font-size:15px;color:var(--teal);">${proGoal}g</div></div>
+        <div class="metric"><div class="label">Timeline</div><div class="metric-val" style="font-size:15px;">${Math.ceil(diffLbs/0.5/4.33)}–${Math.ceil(diffLbs/0.25/4.33)}<span style="font-size:11px;color:var(--text2);"> mo</span></div></div>
+        <div class="metric"><div class="label">To go</div><div class="metric-val" style="font-size:15px;color:var(--teal);">+${diffLbs} lbs</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);">TDEE: ${tdee?.toLocaleString()} kcal/day (moderate activity)</div>
+    </div>`:''}
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:9px;">Log weight</div>
+      <div style="display:flex;gap:9px;margin-bottom:10px;"><input type="number" inputmode="decimal" id="new-wt" placeholder="lbs" style="flex:1;"/><button class="btn btn-primary btn-sm" onclick="logWeightNow()">Log</button></div>
+      ${S.wtHistory.slice().reverse().slice(0,6).map(e=>`<div class="wt-bar"><span style="color:var(--text2);">${e.date}</span><span style="font-weight:600;">${e.wt} lbs</span></div>`).join('')||'<div style="font-size:14px;color:var(--text2);">No entries yet.</div>'}
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;">
+        <div style="font-size:14px;font-weight:600;">Measurements</div>
+        <button class="btn btn-sm" onclick="showMeasurementsModal()">Log</button>
+      </div>
+      ${lastM?`<div style="font-size:12px;color:var(--text2);margin-bottom:8px;">Last: ${lastM.date}</div>
+        ${MEASURES.filter(m=>lastM[m]).map(m=>`<div class="measure-row"><span style="color:var(--text2);">${m}</span><span style="font-weight:600;">${lastM[m]}"</span></div>`).join('')}`
+        :'<div style="font-size:14px;color:var(--text2);">No measurements yet.</div>'}
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px;">Update goal weight</div>
+      <div style="display:flex;gap:9px;margin-bottom:12px;"><input type="number" inputmode="decimal" id="update-goal" placeholder="${S.goalWt||'lbs'}" style="flex:1;"/><button class="btn btn-primary btn-sm" onclick="updateGoalNow()">Update</button></div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px;">Update calorie goal</div>
+      <div style="display:flex;gap:9px;"><input type="number" inputmode="decimal" id="update-cals" placeholder="${calGoal}" style="flex:1;"/><button class="btn btn-primary btn-sm" onclick="updateCalsNow()">Update</button></div>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Apple Watch sleep</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5;">Open Health → Browse → Sleep → enter your hours here. Updates your readiness score automatically.</div>
+      <button class="btn btn-sm" style="width:100%;" onclick="showSleepModal()">Log sleep from Apple Health</button>
+    </div>`;
+}
+
+function logWeightNow(){const w=parseFloat(document.getElementById('new-wt')?.value);if(!w)return;S.wtHistory.push({date:todayStr(),wt:w});S.weightLbs=w;save();setTab('body');}
+function updateGoalNow(){const g=parseFloat(document.getElementById('update-goal')?.value);if(!g)return;S.goalWt=g;save();setTab('body');}
+function updateCalsNow(){const c=parseFloat(document.getElementById('update-cals')?.value);if(!c)return;S.calGoal=c;save();setTab('body');}
+
+// ─── PROGRESS TAB ─────────────────────────────────────────────────────────────
+function renderProgress(){
+  const allEx=[...new Set(CYCLE.flatMap(d=>d.ex.map(e=>e.name)))];
+  const prItems=allEx.filter(n=>S.prs[n]);
+  return`
+    <div style="font-size:20px;font-weight:600;margin-bottom:13px;">Records & Progress</div>
+    ${prItems.length?`<div class="section-title">Personal records</div>
+      <div class="card" style="padding:10px 14px;">
+        ${prItems.map(n=>`<div class="row"><div style="font-size:14px;">${n}</div><span style="font-size:14px;font-weight:600;color:var(--orange);">${S.prs[n]} lbs</span></div>`).join('')}
+      </div>`:'<div style="font-size:14px;color:var(--text2);margin-bottom:12px;">Log weights during workouts to set PRs.</div>'}
+    <div class="section-title">Progressive overload</div>
+    <div class="card" style="padding:10px 14px;">
+      ${allEx.map(exName=>{
+        const pts=S.history.map(h=>{const dd=getActiveCycle().find(d=>d.day===h.cycleDay);if(!dd)return null;const ei=dd.ex.findIndex(e=>e.name===exName);if(ei===-1||!h.log?.[ei])return null;const maxW=Math.max(...Object.values(h.log[ei]).map(s=>parseFloat(s?.weight)||0));return maxW>0?{date:h.date,weight:maxW}:null;}).filter(Boolean);
+        const latest=pts[pts.length-1],prev=pts[pts.length-2];const trend=latest&&prev?latest.weight-prev.weight:null;
+        return`<div class="row"><div style="font-size:14px;">${exName}</div>
+          <div style="display:flex;align-items:center;gap:7px;">
+            ${latest?.weight?`<span style="font-size:14px;font-weight:600;color:var(--orange);">${latest.weight} lbs</span>`:''}
+            ${trend===null?`<span style="font-size:12px;color:var(--text2);">—</span>`:trend>0?`<span style="font-size:12px;color:var(--teal);">↑ +${trend}</span>`:trend<0?`<span style="font-size:12px;color:var(--red);">↓ ${trend}</span>`:`<span style="font-size:12px;color:var(--text2);">→</span>`}
+          </div></div>`;}).join('')}
+    </div>
+    ${S.history.length?`<div class="section-title">Session history</div>
+      <div class="card" style="padding:10px 14px;">
+        ${[...S.history].reverse().slice(0,15).map(h=>{
+          const sess=getActiveCycle().find(d=>d.day===h.cycleDay);
+          const sets=Object.values(h.log||{}).reduce((a,ex)=>a+Object.values(ex).filter(s=>s?.done).length,0);
+          return`<div class="row" onclick="showSessionDetail('${h.date}',${h.cycleDay})" style="cursor:pointer;">
+            <div><div style="font-size:14px;font-weight:600;">${sess?.title}</div><div style="font-size:12px;color:var(--text2);">${h.date} · ${fmtTime(h.elapsed||0)}${h.notes?' · has note':''}</div></div>
+            <div style="text-align:right;"><div style="font-size:14px;font-weight:600;color:var(--orange);">${sets} sets</div>${h.completed?'<div style="font-size:12px;color:var(--teal);">Complete</div>':''}</div>
+          </div>`;}).join('')}
+      </div>`:''}
+    <div style="margin-top:10px;"><button class="btn btn-sm" style="width:100%;" onclick="exportData()">Export all data</button></div>`;
+}
+
+function showSessionDetail(date,cd){
+  const h=S.history.find(h=>h.date===date&&h.cycleDay===cd);if(!h)return;
+  const sess=getActiveCycle().find(d=>d.day===cd);
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:2px;">${sess?.title}</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">${date} · ${fmtTime(h.elapsed||0)}</div>
+    ${h.notes?`<div style="background:var(--bg2);border-radius:var(--radius);padding:10px 13px;margin-bottom:12px;font-size:14px;font-style:italic;color:var(--text2);">"${h.notes}"</div>`:''}
+    ${sess?.ex.map((ex,ei)=>{const exLog=h.log?.[ei];if(!exLog)return'';const sets=Object.values(exLog).filter(s=>s?.done);
+      return`<div style="margin-bottom:9px;"><div style="font-size:14px;font-weight:600;">${ex.name}</div>
+        <div style="font-size:13px;color:var(--text2);">${sets.map((s,i)=>`S${i+1}: ${s.weight||'—'}lbs × ${s.reps||'—'}`).join(' · ')}</div></div>`;}).join('')}`);
+}
+
+function exportData(){
+  const data={exportDate:todayStr(),config:{height:`${S.heightFt}'${S.heightIn}"`,goalWeight:S.goalWt,calGoal:getCalGoal(),cycleStart:S.cycleStart},weightHistory:S.wtHistory,personalRecords:S.prs,sessionHistory:S.history,measurements:S.measurements,diary:S.diary};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`firefighter-training-${todayStr()}.json`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+// ─── MODALS ────────────────────────────────────────────────────────────────────
+function openModal(html){
+  document.getElementById('modal-area').innerHTML=`
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal" style="padding-bottom:0;">
+        ${html}
+        <div style="position:sticky;bottom:0;background:var(--bg);padding:10px 0 max(14px,env(safe-area-inset-bottom));margin-top:8px;border-top:0.5px solid var(--border);">
+          <button onclick="closeModal()" style="width:100%;background:none;border:none;font-size:15px;color:var(--text2);cursor:pointer;padding:6px;font-family:inherit;">Close</button>
+        </div>
+      </div>
+    </div>`;}
+function closeModal(){document.getElementById('modal-area').innerHTML='';}
+
+function showCheckinModal(){
+  const ex=S.checkins[todayStr()]||{energy:7,soreness:3,stress:4,hydration:7};
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:14px;">Daily check-in</div>
+    ${[{key:'energy',label:'Energy level',min:'Drained',max:'Energized',val:ex.energy||7},
+       {key:'soreness',label:'Muscle soreness',min:'None',max:'Very sore',val:ex.soreness||3},
+       {key:'stress',label:'Stress level',min:'Relaxed',max:'Stressed',val:ex.stress||4},
+       {key:'hydration',label:'Hydration',min:'Thirsty',max:'Well hydrated',val:ex.hydration||7},
+    ].map(f=>`<div class="checkin-wrap">
+      <div class="checkin-label-row"><span style="font-size:14px;font-weight:600;">${f.label}</span><span style="font-size:14px;font-weight:600;color:var(--orange);" id="ci-val-${f.key}">${f.val}</span></div>
+      <input type="range" min="1" max="10" step="1" value="${f.val}" id="ci-${f.key}" oninput="document.getElementById('ci-val-${f.key}').textContent=this.value"/>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);"><span>${f.min}</span><span>${f.max}</span></div>
+    </div>`).join('')}
+    ${!S.sleepLog[todayStr()]?`<button class="btn btn-sm" style="width:100%;margin-bottom:11px;" onclick="closeModal();showSleepModal()">Also log last night's sleep →</button>`:''}
+    <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="saveCheckin()">Save check-in</button>`);
+}
+
+function saveCheckin(){
+  S.checkins[todayStr()]={energy:parseInt(document.getElementById('ci-energy')?.value)||7,soreness:parseInt(document.getElementById('ci-soreness')?.value)||3,stress:parseInt(document.getElementById('ci-stress')?.value)||4,hydration:parseInt(document.getElementById('ci-hydration')?.value)||7};
+  save();closeModal();setTab(activeTab);
+}
+
+function showSleepModal(){
+  const ex=S.sleepLog[todayStr()]||{hours:7.5,quality:'good'};
+  selectedQuality=ex.quality||'good';
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:3px;">Log sleep</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;">From Apple Health or your estimate</div>
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:14px;font-weight:600;">Hours slept</span><span style="font-size:14px;font-weight:600;color:var(--orange);" id="sleep-hr-val">${parseFloat(ex.hours).toFixed(1)}</span></div>
+      <input type="range" min="3" max="12" step="0.5" value="${ex.hours}" id="sleep-hrs" oninput="document.getElementById('sleep-hr-val').textContent=parseFloat(this.value).toFixed(1)"/>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);"><span>3h</span><span>12h</span></div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:14px;font-weight:600;margin-bottom:9px;">Sleep quality</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;">
+        ${['poor','fair','good','great'].map(q=>`<button class="btn btn-sm ${ex.quality===q?'btn-primary':''}" id="q-${q}" onclick="selectQuality('${q}')">${q.charAt(0).toUpperCase()+q.slice(1)}</button>`).join('')}
+      </div>
+    </div>
+    <div style="background:var(--bbg);border-radius:var(--radius);padding:11px 13px;margin-bottom:14px;font-size:13px;color:var(--btxt);line-height:1.5;">
+      <strong>Apple Watch:</strong> Open Health → Browse → Sleep → Sleep Duration. Enter those hours here.
+    </div>
+    <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="saveSleep()">Save</button>`);
+}
+
+function selectQuality(q){
+  selectedQuality=q;
+  ['poor','fair','good','great'].forEach(v=>{const btn=document.getElementById('q-'+v);if(btn)btn.className='btn btn-sm'+(v===q?' btn-primary':'');});
+}
+
+function saveSleep(){
+  const hrs=parseFloat(document.getElementById('sleep-hrs')?.value)||7;
+  S.sleepLog[todayStr()]={hours:hrs,quality:selectedQuality};
+  save();closeModal();setTab(activeTab);
+}
+
+function showCalendarModal(){
+  const today=new Date(),dn=cycleDay(S.cycleStart);
+  const start=new Date(today.getFullYear(),today.getMonth(),1);
+  const daysInMonth=new Date(today.getFullYear(),today.getMonth()+1,0).getDate();
+  let html='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px;">';
+  ['S','M','T','W','T','F','S'].forEach(d=>html+=`<div style="text-align:center;font-size:11px;color:var(--text2);padding:3px;">${d}</div>`);
+  html+='</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;">';
+  for(let i=0;i<start.getDay();i++)html+=`<div></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const date=new Date(today.getFullYear(),today.getMonth(),d);
+    const ds=date.toISOString().slice(0,10);
+    const diff=Math.floor((date.getTime()-new Date(S.cycleStart).getTime())/86400000);
+    const cd=diff>=0?(diff%6)+1:null;
+    const isToday=ds===todayStr();
+    const done=S.history.find(h=>h.date===ds);
+    const sess=cd?getActiveCycle().find(c=>c.day===cd):null;
+    const bg=done?'var(--gbg)':isToday?'var(--obg)':sess?.loc==='gym'?'var(--bbg)':cd?'var(--bg2)':'transparent';
+    const border=isToday?'border:2px solid var(--orange);':'border:0.5px solid var(--border);';
+    html+=`<div class="cal-day" style="background:${bg};${border}">
+      <span style="font-size:12px;font-weight:${isToday?'600':'400'};">${d}</span>
+      ${done?`<div style="width:5px;height:5px;border-radius:50%;background:var(--teal);"></div>`:sess?.loc==='gym'?`<div style="width:5px;height:5px;border-radius:50%;background:var(--blue);"></div>`:cd?`<div style="width:5px;height:5px;border-radius:50%;background:var(--border2);"></div>`:''}
+    </div>`;
+  }
+  html+='</div>';
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:14px;">${today.toLocaleString('default',{month:'long',year:'numeric'})}</div>
+    ${html}
+    <div style="display:flex;gap:12px;margin-top:13px;flex-wrap:wrap;font-size:12px;color:var(--text2);">
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--teal);margin-right:4px;"></span>Done</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin-right:4px;"></span>Gym day</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--border2);margin-right:4px;"></span>Home day</span>
+    </div>`);
+}
+
+function showWeeklySummary(){
+  const weekAgo=new Date();weekAgo.setDate(weekAgo.getDate()-7);
+  const ws=S.history.filter(h=>new Date(h.date)>=weekAgo);
+  const totalSets=ws.reduce((a,h)=>a+Object.values(h.log||{}).reduce((b,ex)=>b+Object.values(ex).filter(s=>s?.done).length,0),0);
+  const totalTime=ws.reduce((a,h)=>a+(h.elapsed||0),0);
+  const gymDays=ws.filter(h=>getActiveCycle().find(d=>d.day===h.cycleDay)?.loc==='gym').length;
+  let totalPro=0,nutrDays=0;
+  for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);const e=getAllEntries(ds);if(e.length){totalPro+=sumMacro(e,'pro');nutrDays++;}}
+  const avgPro=nutrDays?Math.round(totalPro/nutrDays):null;
+  let totalCals=0,calDays=0;
+  for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);const e=getAllEntries(ds);if(e.length){totalCals+=sumMacro(e,'cal');calDays++;}}
+  const avgCals=calDays?Math.round(totalCals/calDays):null;
+  const prHits=ws.filter(h=>Object.values(h.log||{}).some((ex,ei)=>{const sess=getActiveCycle().find(d=>d.day===h.cycleDay);const n=sess?.ex[ei]?.name;return n&&Object.values(ex).some(s=>parseFloat(s?.weight)===S.prs[n]);})).length;
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:14px;">Weekly summary</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px;">
+      <div class="metric"><div class="label">Sessions</div><div class="metric-val">${ws.length}</div></div>
+      <div class="metric"><div class="label">Total sets</div><div class="metric-val">${totalSets}</div></div>
+      <div class="metric"><div class="label">Time trained</div><div class="metric-val" style="font-size:16px;">${fmtTime(totalTime)}</div></div>
+      <div class="metric"><div class="label">PRs hit</div><div class="metric-val" style="color:var(--orange);">${prHits}</div></div>
+    </div>
+    ${avgCals?`<div style="background:var(--obg);border-radius:var(--radius);padding:10px 13px;margin-bottom:9px;font-size:14px;color:var(--otxt);">Avg calories: <strong>${avgCals.toLocaleString()} kcal/day</strong></div>`:''}
+    ${avgPro?`<div style="background:var(--gbg);border-radius:var(--radius);padding:10px 13px;margin-bottom:9px;font-size:14px;color:var(--gtxt);">Avg protein: <strong>${avgPro}g/day</strong></div>`:''}
+    ${prHits>0?`<div style="background:var(--obg);border-radius:var(--radius);padding:10px 13px;margin-bottom:9px;font-size:14px;color:var(--otxt);">${prHits} new PR${prHits>1?'s':''} this week!</div>`:''}
+    <button class="btn btn-ghost" style="width:100%;margin-top:4px;" onclick="closeModal()">Close</button>`);
+}
+
+function showMeasurementsModal(){
+  openModal(`<div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:13px;">Log measurements (inches)</div>
+    ${MEASURES.map(m=>`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <label style="font-size:14px;flex:1;">${m}</label>
+      <input type="number" inputmode="decimal" id="m-${m.replace(/ /g,'-')}" placeholder="in" style="width:80px;" step="0.25"/>
+    </div>`).join('')}
+    <button class="btn btn-primary" style="width:100%;padding:12px;margin-top:6px;" onclick="saveMeasurements()">Save</button>`);
+}
+
+function saveMeasurements(){
+  const entry={date:todayStr()};
+  MEASURES.forEach(m=>{const v=parseFloat(document.getElementById('m-'+m.replace(/ /g,'-'))?.value);if(v)entry[m]=v;});
+  S.measurements.push(entry);save();closeModal();setTab('body');
+}
+
+init();
+</script>
+</body>
+</html>
