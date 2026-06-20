@@ -1230,7 +1230,7 @@ const FOOD_DB=[
   ["Panda Express White Steamed Rice",380,7,86,0,"1 side"],
   ["Panda Express Super Greens",90,6,13,2,"1 side"],
   ["Panda Express Egg Roll",200,6,25,8,"1 egg roll"],
-  ["Panda Express Bowl (1 entree + 1 side)",~820,~28,~110,~25,"1 bowl (approx)"].map((v,i)=>typeof v==='string'?v:v), // skip, handled below
+  ["Panda Express Bowl (chicken + chow mein)",820,28,110,25,"1 bowl (approx)"],
 
   // ── SUBWAY ───────────────────────────────────────────────────────────────────
   ["Subway 6\" Turkey Breast",280,18,40,4,"6\" on 9-grain wheat"],
@@ -2125,101 +2125,264 @@ function updateProgress(){
 function toggleGymOverride(){S.gymOverride=!S.gymOverride;save();setTab(activeTab);}
 
 // ─── AI PLAN TAB ──────────────────────────────────────────────────────────────
+let _trainerChat=[];
+
+function buildTypingIndicator(){
+  if(!_trainerChat.length)return'';
+  if(_trainerChat[_trainerChat.length-1].role!=='user')return'';
+  return'<div style="display:flex;"><div style="background:var(--bg2);border-radius:14px 14px 14px 4px;padding:10px 13px;"><div class="spinner" style="width:20px;height:20px;border-width:2px;"></div></div></div>';
+}
+
+function buildDataContext(){
+  const lw=S.wtHistory.length?S.wtHistory[S.wtHistory.length-1].wt:S.weightLbs;
+  const kg=lw?lbsToKg(lw):null;
+  const calGoal=getCalGoal();
+  const proGoal=getProteinGoal();
+
+  // Recent sessions (last 14)
+  const recent=[...S.history].reverse().slice(0,14);
+  const sessionSummary=recent.map(h=>{
+    const sess=getActiveCycle().find(d=>d.day===h.cycleDay);
+    const sets=Object.values(h.log||{}).reduce((a,ex)=>a+Object.values(ex).filter(s=>s?.done).length,0);
+    const weights=[];
+    (sess?.ex||[]).forEach((ex,ei)=>{
+      const exLog=h.log?.[ei];
+      if(!exLog)return;
+      const maxW=Math.max(...Object.values(exLog).map(s=>parseFloat(s?.weight)||0));
+      if(maxW>0)weights.push(`${ex.name}: ${maxW}lbs`);
+    });
+    return `${h.date} - ${sess?.title||'Unknown'} - ${sets} sets${weights.length?' ('+weights.slice(0,3).join(', ')+(weights.length>3?'...':'')+')':''}`;
+  }).join('\n');
+
+  // Nutrition last 7 days
+  const nutrSummary=[];
+  for(let i=0;i<7;i++){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    const entries=getAllEntries(ds);
+    if(entries.length){
+      const cal=sumMacro(entries,'cal');
+      const pro=sumMacro(entries,'pro');
+      nutrSummary.push(`${ds}: ${cal} kcal, ${pro}g protein`);
+    }
+  }
+
+  // PRs
+  const prList=Object.entries(S.prs).map(([k,v])=>`${k}: ${v}lbs`).join(', ');
+
+  // Supplements
+  const activeSups=S.suppList.filter(s=>s.active).map(s=>`${s.name} ${s.dose}${s.unit}`).join(', ');
+
+  // Readiness
+  const r=getReadiness();
+  const sl=S.sleepLog[todayStr()];
+  const ci=S.checkins[todayStr()];
+
+  return `ATHLETE PROFILE:
+- Weight: ${lw?lw+' lbs':'unknown'}${S.goalWt?' | Goal: '+S.goalWt+' lbs ('+((S.goalWt-lw)>0?'+':'')+(S.goalWt-lw).toFixed(1)+' lbs to go)':''}
+- Height: ${S.heightFt?S.heightFt+"'"+S.heightIn+'"':'unknown'}
+- Occupation: Firefighter, 48/96 shift schedule (2 days on, 4 days off)
+- Total sessions logged: ${S.history.length}
+- Cycles completed: ${S.cycleCount}
+- Current readiness score: ${r}/10
+- Sleep last night: ${sl?sl.hours+'h ('+sl.quality+')':'not logged'}
+- Today check-in: ${ci?'Energy '+ci.energy+'/10, Soreness '+ci.soreness+'/10, Stress '+ci.stress+'/10':'not logged'}
+
+CURRENT PROGRAM: ${S.customCycle?'Custom AI-generated plan':'Built-in 48/96 firefighter program'}
+- Gym equipment (on-duty): dumbbells, barbells, Rogue cable machine, leg extension/curl, cardio
+- Home equipment (off-duty): kettlebells, resistance bands, bodyweight
+
+DAILY TARGETS:
+- Calories: ${calGoal.toLocaleString()} kcal/day
+- Protein: ${proGoal}g/day
+
+NUTRITION - LAST 7 DAYS:
+${nutrSummary.length?nutrSummary.join('\n'):'No nutrition data logged yet'}
+
+RECENT WORKOUT SESSIONS (last 14):
+${sessionSummary||'No sessions logged yet'}
+
+PERSONAL RECORDS:
+${prList||'No PRs set yet'}
+
+ACTIVE SUPPLEMENTS: ${activeSups||'None logged'}`;
+}
+
 function renderAIPlan(){
   const hasPlan=!!S.customCycle;
   const meta=S.aiPlanMeta;
-  const cycle=getActiveCycle();
 
   return`
-    <div style="font-size:20px;font-weight:600;margin-bottom:4px;">AI Workout Plan</div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">Describe your goals and Claude builds a custom program for your 48/96 schedule</div>
+    <div style="font-size:20px;font-weight:600;margin-bottom:4px;">AI Trainer</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;">Your personal trainer — ask anything about your workouts, diet, or progress</div>
 
-    ${hasPlan?`
-      <div style="background:var(--gbg);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--gtxt);">Custom AI plan active</div>
-          <div style="font-size:12px;color:var(--gtxt);margin-top:2px;">${meta?.goal||''} · Generated ${meta?.generatedAt||''}</div>
-        </div>
-        <button class="btn btn-sm" onclick="clearAIPlan()">Reset to default</button>
+    <!-- CHAT SECTION -->
+    <div class="card" style="margin-bottom:12px;padding:0;overflow:hidden;">
+      <div style="padding:12px 14px;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:14px;font-weight:600;">Talk to your trainer</div>
+        ${_trainerChat.length>0?`<button class="btn btn-ghost btn-sm" onclick="clearTrainerChat()">Clear</button>`:''}
       </div>
-      <div class="section-title">Your current plan (${cycle.length} days)</div>
-      ${cycle.map(d=>`<div class="card" style="padding:11px 14px;margin-bottom:8px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-          <div style="font-size:14px;font-weight:600;">${d.title}</div>
-          <span class="badge ${d.loc==='gym'?'badge-gym':'badge-home'}">${d.loc==='gym'?'Gym':'Home'}</span>
-        </div>
-        <div style="font-size:12px;color:var(--text2);">${d.sub} · ${d.dur}</div>
-        ${d.ex?`<div style="margin-top:8px;border-top:0.5px solid var(--border);padding-top:8px;">${d.ex.map(e=>`<div style="font-size:13px;padding:2px 0;">${e.name} <span style="color:var(--text2);">${e.sets}×${e.reps}</span></div>`).join('')}</div>`:''}
-      </div>`).join('')}
-    `:''}
 
+      <!-- Chat history -->
+      <div id="chat-history" style="padding:12px 14px;max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">
+        ${_trainerChat.length===0?`
+          <div style="text-align:center;padding:16px 0;">
+            <div style="font-size:32px;margin-bottom:8px;">🏋️</div>
+            <div style="font-size:14px;font-weight:500;margin-bottom:6px;">Hey, I'm your AI trainer</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.6;">I have access to all your workout history, nutrition logs, PRs, and body stats. Ask me anything.</div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;">
+            ${[
+              'Should I change my workout program?',
+              'Am I eating enough to hit my goal weight?',
+              'How is my progression looking?',
+              'What should I focus on this week?',
+              'Why am I not gaining weight?',
+              'Build me a new program'
+            ].map(q=>`<button class="btn btn-sm" style="font-size:12px;text-align:left;line-height:1.4;" onclick="sendQuickMessage('${q.replace(/'/g,"\\'")}')">${q}</button>`).join('')}
+          </div>`
+        :_trainerChat.map(m=>`
+          <div style="display:flex;${m.role==='user'?'justify-content:flex-end;':''}">
+            <div style="max-width:88%;padding:10px 13px;border-radius:${m.role==='user'?'14px 14px 4px 14px':'14px 14px 14px 4px'};background:${m.role==='user'?'var(--orange)':'var(--bg2)'};color:${m.role==='user'?'white':'var(--text)'};font-size:14px;line-height:1.55;white-space:pre-wrap;">
+              ${m.content}
+            </div>
+          </div>`).join('')+buildTypingIndicator()}
+      </div>
+
+      <!-- Input area -->
+      <div style="padding:10px 14px;border-top:0.5px solid var(--border);display:flex;gap:8px;align-items:flex-end;">
+        <textarea id="trainer-input" placeholder="Ask your trainer anything..." style="flex:1;min-height:40px;max-height:100px;resize:none;border-radius:var(--radius);padding:8px 12px;font-size:14px;line-height:1.4;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendTrainerMessage();}"></textarea>
+        <button class="btn btn-primary" style="padding:9px 14px;flex-shrink:0;" onclick="sendTrainerMessage()">Send</button>
+      </div>
+    </div>
+
+    <!-- PLAN GENERATOR SECTION -->
     <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:12px;">Build a new plan</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px;">Generate workout plan</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">Claude builds a full 6-day program tailored to your schedule and goals</div>
 
-      <div style="margin-bottom:12px;">
+      ${hasPlan?`<div style="background:var(--gbg);border-radius:var(--radius);padding:10px 13px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-size:13px;font-weight:600;color:var(--gtxt);">Custom plan active</div>
+          <div style="font-size:12px;color:var(--gtxt);">${meta?.goal||''} · ${meta?.generatedAt||''}</div></div>
+        <button class="btn btn-sm" onclick="clearAIPlan()">Reset</button>
+      </div>`:''}
+
+      <div style="margin-bottom:11px;">
         <div class="label" style="margin-bottom:6px;">Primary goal</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;" id="goal-btns">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" id="goal-btns">
           ${['Build muscle','Lose fat','Build strength','Athletic performance','General fitness'].map(g=>`
-            <button class="btn btn-sm" id="goal-${g.replace(/ /g,'-')}" onclick="selectAIOption('goal','${g}',this)"
-              style="text-align:left;padding:9px 12px;">${g}</button>`).join('')}
+            <button class="btn btn-sm" id="goal-${g.replace(/ /g,'-')}" onclick="selectAIOption('goal','${g}',this)" style="text-align:left;padding:8px 11px;">${g}</button>`).join('')}
         </div>
       </div>
 
-      <div style="margin-bottom:12px;">
+      <div style="margin-bottom:11px;">
         <div class="label" style="margin-bottom:6px;">Experience level</div>
-        <div style="display:flex;gap:7px;">
+        <div style="display:flex;gap:6px;">
           ${['Beginner','Intermediate','Advanced'].map(e=>`
             <button class="btn btn-sm" id="exp-${e}" onclick="selectAIOption('exp','${e}',this)" style="flex:1;">${e}</button>`).join('')}
         </div>
       </div>
 
-      <div style="margin-bottom:12px;">
-        <div class="label" style="margin-bottom:6px;">Session length preference</div>
-        <div style="display:flex;gap:7px;">
+      <div style="margin-bottom:11px;">
+        <div class="label" style="margin-bottom:6px;">Session length</div>
+        <div style="display:flex;gap:6px;">
           ${['30–45 min','45–60 min','60–75 min'].map(t=>`
             <button class="btn btn-sm" id="dur-${t.replace(/ /g,'')}" onclick="selectAIOption('dur','${t}',this)" style="flex:1;font-size:12px;">${t}</button>`).join('')}
         </div>
       </div>
 
-      <div style="margin-bottom:12px;">
-        <div class="label" style="margin-bottom:6px;">Gym equipment available</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;" id="equip-btns">
-          ${['Full gym (barbells, cables, machines)','Dumbbells only','Kettlebells + bands','Bodyweight only'].map(e=>`
-            <button class="btn btn-sm" id="equip-${e.slice(0,10).replace(/ /g,'')}" onclick="selectAIOption('equip','${e}',this)"
-              style="text-align:left;">${e}</button>`).join('')}
-        </div>
+      <div style="margin-bottom:11px;">
+        <div class="label" style="margin-bottom:6px;">Any injuries or limitations?</div>
+        <textarea id="ai-injuries" placeholder="e.g. Bad left knee, shoulder impingement, lower back..." style="min-height:52px;"></textarea>
       </div>
 
-      <div style="margin-bottom:12px;">
-        <div class="label" style="margin-bottom:6px;">Any injuries or limitations? (optional)</div>
-        <textarea id="ai-injuries" placeholder="e.g. Bad left knee, lower back issues, shoulder impingement..." style="min-height:56px;"></textarea>
+      <div style="margin-bottom:14px;">
+        <div class="label" style="margin-bottom:6px;">Anything else to know?</div>
+        <textarea id="ai-notes" placeholder="e.g. Want more upper body focus, hate running, want to add carries..."></textarea>
       </div>
 
-      <div style="margin-bottom:16px;">
-        <div class="label" style="margin-bottom:6px;">Anything else Claude should know? (optional)</div>
-        <textarea id="ai-notes" placeholder="e.g. I want to focus on upper body, I hate running, I work night shifts sometimes..."></textarea>
-      </div>
-
-      <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="generateAIPlan()" id="generate-btn">
-        Generate my plan with AI
-      </button>
+      <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px;" onclick="generateAIPlan()" id="generate-btn">Generate my plan</button>
       <div id="ai-status" style="font-size:13px;color:var(--text2);text-align:center;margin-top:10px;min-height:18px;"></div>
     </div>`;
 }
 
-// Track selections
+function clearTrainerChat(){
+  _trainerChat=[];
+  setTab('aiplan');
+}
+
+function sendQuickMessage(msg){
+  const input=document.getElementById('trainer-input');
+  if(input)input.value=msg;
+  sendTrainerMessage();
+}
+
+async function sendTrainerMessage(){
+  const input=document.getElementById('trainer-input');
+  const msg=(input?.value||'').trim();
+  if(!msg)return;
+  if(input)input.value='';
+
+  _trainerChat.push({role:'user',content:msg});
+  setTab('aiplan'); // re-render to show user message + spinner
+
+  // Scroll to bottom of chat
+  setTimeout(()=>{
+    const ch=document.getElementById('chat-history');
+    if(ch)ch.scrollTop=ch.scrollHeight;
+  },50);
+
+  // Build system prompt with all user data
+  const dataCtx=buildDataContext();
+  const systemPrompt=`You are a knowledgeable, direct personal trainer and nutrition coach. You have full access to this athlete's data. Be specific, practical, and encouraging. Reference their actual numbers when relevant. Keep responses conversational and mobile-friendly — use short paragraphs. Don't use excessive bullet points. When they ask about diet or calories, reference their actual logged data and goal. When they ask about workouts, reference their actual sessions and PRs.
+
+${dataCtx}`;
+
+  try{
+    const messages=_trainerChat.map(m=>({role:m.role,content:m.content}));
+
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        system:systemPrompt,
+        messages:messages
+      })
+    });
+
+    if(!resp.ok){
+      const err=await resp.json().catch(()=>({}));
+      throw new Error(err.error?.message||'API error '+resp.status);
+    }
+
+    const data=await resp.json();
+    const reply=data.content?.[0]?.text||'Sorry, I couldn\'t get a response. Try again.';
+
+    _trainerChat.push({role:'assistant',content:reply});
+    setTab('aiplan');
+    setTimeout(()=>{
+      const ch=document.getElementById('chat-history');
+      if(ch)ch.scrollTop=ch.scrollHeight;
+    },50);
+
+  } catch(e){
+    _trainerChat.push({role:'assistant',content:`Sorry, I hit an error: ${e.message}. Check your connection and try again.`});
+    setTab('aiplan');
+  }
+}
+
 const _aiSelections={goal:null,exp:'Intermediate',dur:'45–60 min',equip:'Full gym (barbells, cables, machines)'};
 
 function selectAIOption(type,val,btn){
   _aiSelections[type]=val;
-  // Highlight selected button in its group
-  const groupMap={goal:'goal-btns',exp:null,dur:null,equip:'equip-btns'};
+  const groupMap={goal:'goal-btns',equip:'equip-btns'};
   if(groupMap[type]){
     document.getElementById(groupMap[type])?.querySelectorAll('.btn').forEach(b=>{
       b.style.background='';b.style.color='';b.style.borderColor='';
     });
   } else {
-    // For flex row groups find siblings
     btn.parentElement?.querySelectorAll('.btn').forEach(b=>{
       b.style.background='';b.style.color='';b.style.borderColor='';
     });
@@ -2232,11 +2395,10 @@ async function generateAIPlan(){
     document.getElementById('ai-status').textContent='Please select a primary goal first.';
     return;
   }
-
   const btn=document.getElementById('generate-btn');
   const statusEl=document.getElementById('ai-status');
   btn.disabled=true;btn.textContent='Generating...';
-  statusEl.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:8px;"><div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Claude is building your plan...</div>`;
+  statusEl.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:8px;"><div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Claude is building your program...</div>`;
 
   const lw=S.wtHistory.length?S.wtHistory[S.wtHistory.length-1].wt:S.weightLbs;
   const injuries=document.getElementById('ai-injuries')?.value||'None';
@@ -2248,102 +2410,60 @@ USER PROFILE:
 - Goal: ${_aiSelections.goal}
 - Experience: ${_aiSelections.exp}
 - Session length: ${_aiSelections.dur}
-- Available equipment: ${_aiSelections.equip}
+- Weight: ${lw?lw+' lbs':'unknown'} | Goal weight: ${S.goalWt?S.goalWt+' lbs':'not set'}
 - Injuries/limitations: ${injuries}
-- Current weight: ${lw?lw+' lbs':'unknown'}
 - Additional notes: ${notes||'None'}
 
-SCHEDULE CONSTRAINTS:
-- Days 1-2: On duty at fire station (gym available: dumbbells, barbells, cables, leg press, leg curl, leg extension, cardio)
-- Days 3-6: Off duty (home equipment: kettlebells, resistance bands, bodyweight)
-- The cycle repeats every 6 days continuously
+SCHEDULE:
+- Days 1-2: On duty at fire station — gym available (dumbbells, barbells, cables, leg press, leg curl, leg extension, cardio)
+- Days 3-6: Off duty at home (kettlebells, resistance bands, bodyweight)
+- Day 6: Active recovery or rest day
+- Cycle repeats every 6 days continuously
 
 REQUIREMENTS:
-- Design exactly 6 sessions (one per cycle day)
-- Each session must match the location (gym vs home) for that day
-- Day 6 should be active recovery or rest
-- Joint-friendly exercise selection — firefighters need longevity
-- All exercises must be achievable with the stated equipment
-- Include 5-6 exercises per session with sets, reps, and rest periods
-- Include warm-up notes for each session
-- Include form cues for each exercise (1-2 sentences)
+- Exactly 6 sessions matching gym/home location for each day
+- Joint-friendly exercise selection — firefighter longevity matters
+- 5-6 exercises per session with sets, reps (use ranges like "8-10"), rest in seconds
+- Include warm-up for each session
+- Include form cues in the notes field (1-2 sentences)
+- Include 1-2 alternative exercises per exercise
 
-Respond ONLY with a valid JSON array. No explanation, no markdown, no backticks. Just raw JSON.
+Respond ONLY with valid JSON array, no explanation, no markdown, no backticks.
 
-Format:
-[
-  {
-    "day": 1,
-    "label": "Day 1 — On Duty",
-    "title": "Push",
-    "sub": "Chest · Shoulders · Triceps",
-    "loc": "gym",
-    "dur": "45–55 min",
-    "warmup": "5 min bike · band pull-aparts ×15 · arm circles",
-    "ex": [
-      {
-        "name": "Incline DB Press",
-        "sets": 4,
-        "reps": "8–10",
-        "rest": 90,
-        "notes": "Form cue here.",
-        "alts": [{"name": "DB Floor Press", "why": "Protects shoulder"}]
-      }
-    ]
-  }
-]`;
+[{"day":1,"label":"Day 1 — On Duty","title":"Push","sub":"Chest · Shoulders · Triceps","loc":"gym","dur":"45-55 min","warmup":"5 min bike...","ex":[{"name":"Incline DB Press","sets":4,"reps":"8-10","rest":90,"notes":"Form cue.","alts":[{"name":"DB Floor Press","why":"Reason"}]}]}]`;
 
   try{
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-6',
         max_tokens:4000,
         messages:[{role:'user',content:prompt}]
       })
     });
-
-    if(!resp.ok){
-      const err=await resp.json().catch(()=>({}));
-      throw new Error(err.error?.message||'API error '+resp.status);
-    }
-
+    if(!resp.ok){const err=await resp.json().catch(()=>({}));throw new Error(err.error?.message||'API error '+resp.status);}
     const data=await resp.json();
     const raw=data.content?.[0]?.text||'';
-
-    // Strip any accidental markdown fences
     const cleaned=raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
     const plan=JSON.parse(cleaned);
-
-    if(!Array.isArray(plan)||plan.length<4)throw new Error('Invalid plan format');
-
-    // Validate each day has required fields
+    if(!Array.isArray(plan)||plan.length<4)throw new Error('Invalid plan format received');
     plan.forEach((d,i)=>{
       if(!d.day)d.day=i+1;
       if(!d.loc)d.loc=d.day<=2?'gym':'home';
       if(!d.ex)d.ex=[];
-      d.ex.forEach(e=>{
-        if(!e.alts)e.alts=[];
-        if(!e.rest)e.rest=60;
-      });
+      d.ex.forEach(e=>{if(!e.alts)e.alts=[];if(!e.rest)e.rest=60;});
     });
-
     S.customCycle=plan;
-    S.aiPlanMeta={
-      goal:_aiSelections.goal,
-      exp:_aiSelections.exp,
-      injuries:injuries!=='None'?injuries:'',
-      generatedAt:new Date().toLocaleDateString(),
-    };
+    S.aiPlanMeta={goal:_aiSelections.goal,exp:_aiSelections.exp,generatedAt:new Date().toLocaleDateString()};
     save();
-
-    btn.disabled=false;btn.textContent='Generate my plan with AI';
-    statusEl.innerHTML=`<span style="color:var(--teal);font-weight:600;">✓ Plan generated and activated!</span>`;
-    setTimeout(()=>setTab('aiplan'),1200);
-
+    btn.disabled=false;btn.textContent='Generate my plan';
+    statusEl.innerHTML=`<span style="color:var(--teal);font-weight:600;">✓ New plan generated and activated!</span>`;
+    // Also send a message to the chat about the new plan
+    _trainerChat.push({role:'assistant',content:`I've just generated your new ${_aiSelections.goal.toLowerCase()} program and activated it. Head to the Workout tab to see your sessions. I designed it around your 48/96 schedule — gym work on duty days, home training on off days. Want me to walk you through what I programmed and why?`});
+    setTimeout(()=>setTab('aiplan'),1500);
   } catch(e){
-    btn.disabled=false;btn.textContent='Generate my plan with AI';
+    btn.disabled=false;btn.textContent='Generate my plan';
     statusEl.innerHTML=`<span style="color:var(--red);">Error: ${e.message}. Try again.</span>`;
   }
 }
@@ -2351,10 +2471,11 @@ Format:
 function clearAIPlan(){
   openModal(`<div class="modal-handle"></div>
     <div style="font-size:16px;font-weight:600;margin-bottom:8px;">Reset to default plan?</div>
-    <div style="font-size:14px;color:var(--text2);margin-bottom:18px;">Your AI-generated plan will be removed and the built-in firefighter program will be restored. Your workout history, PRs, and all other data are unaffected.</div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:18px;">Your AI plan will be removed and the built-in firefighter program restored. All your history, PRs, and data are unaffected.</div>
     <button class="btn btn-primary" style="width:100%;padding:12px;margin-bottom:9px;" onclick="S.customCycle=null;S.aiPlanMeta=null;save();closeModal();setTab('aiplan');">Yes, reset to default</button>
     <button class="btn btn-ghost" style="width:100%;padding:12px;" onclick="closeModal()">Cancel</button>`);
 }
+
 
 
 function suppTakenToday(id){
